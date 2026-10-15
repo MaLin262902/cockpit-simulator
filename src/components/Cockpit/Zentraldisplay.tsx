@@ -54,7 +54,7 @@ export function Zentraldisplay({ m, lage }: Props) {
             {ansicht === 'medien' && <MedienAnsicht en={en} />}
             {ansicht === 'telefon' && <TelefonAnsicht en={en} />}
             {ansicht === 'fahrzeug' && <FahrzeugAnsicht modus={m.farblogik} en={en} />}
-            {ansicht === 'apps' && <AppRaster m={m} en={en} />}
+            {ansicht === 'apps' && <AppRaster m={m} en={en} oeffneMedien={() => setAnsicht('medien')} />}
             {untertitel && <Untertitel ansage={untertitel} modus={m.akustik} />}
           </Kachel>
           <div className={styles.seite}>
@@ -457,7 +457,8 @@ const APP_RASTER: { name: string; nameEn: string; Icon: IconTyp }[] = [
   { name: 'Bordbuch', nameEn: 'Manual', Icon: I.Apps },
 ];
 
-function AppRaster({ m, en }: { m: CockpitModel; en: boolean }) {
+/** Radio wechselt in die Medienansicht, die anderen Kacheln zeigen nur, dass sie gewählt sind. */
+function AppRaster({ m, en, oeffneMedien }: { m: CockpitModel; en: boolean; oeffneMedien: () => void }) {
   const [offen, setOffen] = useState<string | null>(null);
   const liste = m.gruppierung === 'invertiert' ? [3, 0, 5, 2, 4, 1].map((i) => APP_RASTER[i]) : APP_RASTER;
   return (
@@ -471,14 +472,13 @@ function AppRaster({ m, en }: { m: CockpitModel; en: boolean }) {
             className={styles.appKachel}
             aria-pressed={offen === name}
             aria-label={en ? nameEn : name}
-            onClick={() => setOffen(offen === name ? null : name)}
+            onClick={() => (name === 'Radio' ? oeffneMedien() : setOffen(offen === name ? null : name))}
           >
             <Icon />
             <span>{en ? nameEn : name}</span>
           </button>
         ))}
       </div>
-      {offen && <p className={styles.standHinweis}>{en ? `${offen}: not available while driving` : `${offen}: während der Fahrt nicht verfügbar`}</p>}
     </div>
   );
 }
@@ -518,7 +518,7 @@ function Fahrzeugstatus({ modus, en }: { modus: Modus; en: boolean }) {
         </svg>
       </div>
       <div className={styles.verbrauch}>
-        <span>{en ? 'AVG 38.6 mpg' : 'Ø 6,1 l/100 km'}</span>
+        <span>{en ? 'AVG 3.7 mi/kWh' : 'Ø 16,8 kWh/100 km'}</span>
         <span>{en ? 'RNG 256 mi' : 'Reichweite 412 km'}</span>
       </div>
     </div>

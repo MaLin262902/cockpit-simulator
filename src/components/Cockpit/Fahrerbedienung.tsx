@@ -14,7 +14,7 @@ export function Fahrerbedienung({ en }: { en: boolean }) {
     <div className={styles.fussraum}>
       <button type="button" className={styles.tempomatTaste} aria-pressed={tempomat} onClick={tempomatUmschalten}>
         <span>{en ? 'Cruise' : 'Tempomat'}</span>
-        <strong>{tempomat ? `${tempomatZiel} km/h` : en ? 'off' : 'aus'}</strong>
+        <strong>{tempomat ? (en ? `${Math.round(tempomatZiel * 0.621)} mph` : `${tempomatZiel} km/h`) : en ? 'off' : 'aus'}</strong>
       </button>
 
       <div className={styles.pedale}>

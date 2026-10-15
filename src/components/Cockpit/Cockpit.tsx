@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { CockpitModel } from '../../effects/deriveCockpit';
 import { useBlinktakt } from '../../hooks/useBlinktakt';
 import { useSim } from '../../sim/SimContext';
@@ -56,13 +57,21 @@ export function Cockpit({ modell, beschriftung = 'Fahrzeug-Cockpit' }: Props) {
   );
 }
 
-/** Lüftungsdüsen und echte Tasten unter dem Hauptdisplay (Karte „Blickabwendung“). */
+/**
+ * Lüftungsdüsen und echte Tasten unter dem Hauptdisplay.
+ * Karte „Blickabwendung“: echte Tasten oder nur Klavierlack. Karte „Stellteil-Kompatibilität“: korrekt eine
+ * Warnblinktaste in der Mitte und ein Lautstärkeknopf; invertiert ein Warnblink-Drehregler, der aussieht wie der
+ * Lautstärkeknopf, Lautstärke als Touch-Leiste, flache Sensorflächen statt Tasten und Front-/Heckscheibe vertauscht.
+ */
 function Bedienteil({ m }: { m: CockpitModel }) {
   const { warnblinker, setWarnblinker } = useSim();
   const hell = useBlinktakt(warnblinker);
   const en = m.realeWelt === 'invertiert';
   const nurTouch = m.blickabwendung === 'invertiert';
   const beschriften = m.blickabwendung === 'korrekt';
+  const verdreht = m.stellteile === 'invertiert';
+  // Ein/Aus der Tasten (Klima, Scheiben, Sitzheizung); nur die korrekten Tasten zeigen es mit einem Leuchtstreifen.
+  const [an, setAn] = useState<Record<string, boolean>>({});
 
   const tasten = [
     { name: en ? 'A/C' : 'Klima', Icon: I.Schneeflocke },
@@ -71,7 +80,20 @@ function Bedienteil({ m }: { m: CockpitModel }) {
     { name: en ? 'SEAT' : 'Sitzheizung', Icon: I.Sitzheizung },
   ];
 
-  const warn = (
+  const warn = verdreht ? (
+    <button
+      type="button"
+      className={styles.warnDrehregler}
+      aria-pressed={warnblinker}
+      data-hell={hell}
+      aria-label="Warnblinker"
+      onClick={() => setWarnblinker(!warnblinker)}
+    >
+      <span>
+        <I.Warndreieck />
+      </span>
+    </button>
+  ) : (
     <button
       type="button"
       className={styles.warnblinkTaste}
@@ -85,7 +107,15 @@ function Bedienteil({ m }: { m: CockpitModel }) {
   );
 
   const taste = ({ name, Icon }: (typeof tasten)[number]) => (
-    <button key={name} type="button" className={styles.hardtaste} aria-label={name}>
+    <button
+      key={name}
+      type="button"
+      className={styles.hardtaste}
+      data-sensor={verdreht}
+      aria-label={name}
+      aria-pressed={verdreht ? undefined : Boolean(an[name])}
+      onClick={() => setAn({ ...an, [name]: !an[name] })}
+    >
       <Icon />
       {beschriften && <span>{name}</span>}
     </button>
@@ -103,6 +133,21 @@ function Bedienteil({ m }: { m: CockpitModel }) {
             <span className={styles.klavierlack} aria-hidden="true" />
             {warn}
             <span className={styles.klavierlack} aria-hidden="true" />
+          </>
+        ) : verdreht ? (
+          // Heckscheibe links, Frontscheibe rechts; Lautstärke in der Mitte, der Warnblinker als Knopf außen.
+          <>
+            {[tasten[2], tasten[3]].map(taste)}
+            <span className={styles.touchLeiste} role="img" aria-label={en ? 'VOL touch slider' : 'Lautstärke-Touchleiste'}>
+              <i />
+              <i />
+              <i />
+              <i />
+              <i />
+              {beschriften && <span>{en ? 'VOL' : 'Lautstärke'}</span>}
+            </span>
+            {[tasten[0], tasten[1]].map(taste)}
+            {warn}
           </>
         ) : (
           <>

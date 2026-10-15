@@ -72,8 +72,17 @@ export function tempomatUmschalten(z: Fahrzustand): Fahrzustand {
   return { ...z, tempomat: true, halten: false, tempomatZiel: Math.max(30, Math.round(z.tempo)) };
 }
 
-/** Drehzahl in 1000/min, grob aus Tempo und Gaspedal. */
-export function drehzahl(tempo: number, gas: boolean): number {
-  if (tempo === 0) return 0.8;
-  return Math.min(6.5, 0.9 + (tempo % 45) / 45 + tempo / 60 + (gas ? 1.2 : 0));
+/** Antriebsleistung des Elektromotors in kW, grob aus Tempo und Pedalen (Rekuperation wird nicht angezeigt). */
+export function leistung(tempo: number, pedale: Pedale): number {
+  if (tempo === 0 || pedale.bremse) return 0;
+  const halten = 2 + tempo * 0.12 + tempo * tempo * 0.0012;
+  return Math.min(150, Math.round(halten + (pedale.gas ? 45 : 0)));
+}
+
+/** Akkustand in Prozent (fest, die Fahrt ist dafür zu kurz). */
+export const AKKU_PROZENT = 78;
+
+/** Spannung des Hochvoltakkus in Volt: sinkt unter Last leicht ab. */
+export function akkuSpannung(kw: number): number {
+  return 396.4 - kw * 0.12;
 }

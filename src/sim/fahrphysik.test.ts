@@ -1,5 +1,14 @@
 import { describe, expect, it } from 'vitest';
-import { fahrschritt, KREUZUNG_ABSTAND, startzustand, tempomatUmschalten, type Fahrzustand, type Pedale } from './fahrphysik';
+import {
+  akkuSpannung,
+  fahrschritt,
+  KREUZUNG_ABSTAND,
+  leistung,
+  startzustand,
+  tempomatUmschalten,
+  type Fahrzustand,
+  type Pedale,
+} from './fahrphysik';
 
 const nichts: Pedale = { gas: false, bremse: false };
 const fahre = (z: Fahrzustand, p: Pedale, sekunden: number) => {
@@ -39,5 +48,20 @@ describe('Fahrphysik', () => {
     expect(z.kreuzungen).toBe(1);
     expect(z.rest).toBeGreaterThan(0);
     expect(z.rest).toBeLessThanOrEqual(KREUZUNG_ABSTAND);
+  });
+});
+
+describe('Elektroantrieb', () => {
+  it('Leistung: im Stand und beim Bremsen 0 kW, mit Gas deutlich mehr als beim Rollen', () => {
+    expect(leistung(0, nichts)).toBe(0);
+    expect(leistung(50, { gas: false, bremse: true })).toBe(0);
+    const rollen = leistung(50, nichts);
+    expect(rollen).toBeGreaterThan(0);
+    expect(leistung(50, { gas: true, bremse: false })).toBeGreaterThan(rollen + 30);
+    expect(leistung(250, { gas: true, bremse: false })).toBeLessThanOrEqual(150);
+  });
+
+  it('Akkuspannung sinkt unter Last', () => {
+    expect(akkuSpannung(60)).toBeLessThan(akkuSpannung(0));
   });
 });

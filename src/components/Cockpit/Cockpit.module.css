@@ -187,7 +187,7 @@
   grid-template-columns: 1fr 1.15fr 1fr;
   grid-template-areas:
     'kopf kopf kopf'
-    'tacho mitte drehzahl'
+    'tacho mitte leistung'
     'mini mini mini'
     'fuss fuss fuss';
   gap: 1.2cqi 2cqi;
@@ -207,7 +207,7 @@
     padding: 3cqi 3cqi 3.5cqi;
   }
 
-  .drehzahlBereich {
+  .leistungBereich {
     display: none !important;
   }
 }
@@ -245,7 +245,7 @@
 }
 
 .tachoBereich,
-.drehzahlBereich {
+.leistungBereich {
   display: flex;
   justify-content: center;
   min-width: 0;
@@ -255,8 +255,8 @@
   grid-area: tacho;
 }
 
-.drehzahlBereich {
-  grid-area: drehzahl;
+.leistungBereich {
+  grid-area: leistung;
 }
 
 /* Rundinstrumente */
@@ -476,53 +476,18 @@
 /* Status des Assistenten */
 
 .statusKlar {
-  display: flex;
-  align-items: center;
-  gap: 1cqi;
-  padding: 0.6cqi 1.4cqi;
-  border: 2px solid #8b97a4;
-  border-radius: 99px;
-  background: rgb(255 255 255 / 4%);
-  animation: hervorheben 900ms var(--ease);
+  display: inline-grid;
+  place-items: center;
+  color: #8b97a4;
 }
 
 .statusKlar[data-aktiv='true'] {
-  border-color: var(--ck-green);
-  background: rgb(75 220 142 / 13%);
-}
-
-.statusSymbol {
-  width: max(20px, 3.6cqi);
-  height: max(20px, 3.6cqi);
-  flex: none;
-}
-
-.statusKlar[data-aktiv='true'] .statusSymbol {
   color: var(--ck-green);
 }
 
-.statusText {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.15;
-  font-size: max(var(--min), calc(1.45cqi * var(--s)));
-  color: var(--ck-muted);
-}
-
-.statusText strong {
-  color: var(--ck-text);
-  font-size: 1.15em;
-}
-
-@keyframes hervorheben {
-  from {
-    transform: scale(1.06);
-    box-shadow: 0 0 0 0 rgb(255 255 255 / 55%);
-  }
-  to {
-    transform: scale(1);
-    box-shadow: 0 0 0 1.2cqi rgb(255 255 255 / 0%);
-  }
+.statusSymbol {
+  width: max(22px, 3.8cqi);
+  height: max(22px, 3.8cqi);
 }
 
 /* Akustik */
@@ -677,8 +642,44 @@
   white-space: nowrap;
 }
 
+/* Akku: Symbol mit Füllstand, daneben der Wert */
+.akku {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45em;
+}
+
+.akkuSymbol {
+  position: relative;
+  display: inline-block;
+  width: 1.9em;
+  height: 0.95em;
+  padding: 2px;
+  border: 1.5px solid currentColor;
+  border-radius: 3px;
+}
+
+.akkuSymbol::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -4px;
+  width: 2px;
+  height: 0.4em;
+  border-radius: 0 1px 1px 0;
+  background: currentColor;
+  transform: translateY(-50%);
+}
+
+.akkuSymbol span {
+  display: block;
+  height: 100%;
+  border-radius: 1px;
+  background: var(--ck-green);
+}
+
 @container (max-width: 540px) {
-  .statusleiste span:last-child {
+  .statusleiste > span:last-child {
     display: none;
   }
 }
@@ -1706,8 +1707,8 @@
   justify-content: center;
   gap: 2px;
   min-width: 48px;
-  min-height: 40px;
-  padding: 4px 8px;
+  min-height: 44px;
+  padding: 9px 8px 4px;
   border-radius: 8px;
   border: 1px solid #2a3038;
   background: linear-gradient(180deg, #23282f, #16191e);
@@ -1716,6 +1717,33 @@
   font-size: 11px;
   font-weight: 600;
   box-shadow: 0 2px 0 #050608;
+}
+
+/* Leuchtstreifen in der Taste: an = grün */
+.hardtaste {
+  position: relative;
+  cursor: pointer;
+}
+
+.hardtaste:not([data-sensor='true'])::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 16px;
+  height: 3px;
+  border-radius: 2px;
+  background: #2c323a;
+  transform: translateX(-50%);
+}
+
+.hardtaste:not([data-sensor='true'])[aria-pressed='true']::before {
+  background: var(--ck-green);
+  box-shadow: 0 0 6px rgb(75 220 142 / 70%);
+}
+
+.hardtaste:not([data-sensor='true'])[aria-pressed='true'] {
+  color: #fff;
 }
 
 .hardtaste svg {
@@ -1771,6 +1799,106 @@
   font-family: var(--font);
   font-size: 10px;
   white-space: nowrap;
+}
+
+/* Invertierte Stellteile: Warnblinker als Drehregler, der wie der Lautstärkeknopf aussieht */
+.warnDrehregler {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4a525c, #1a1d22 62%);
+  box-shadow:
+    0 0 0 3px #0a0c0e,
+    0 3px 6px rgb(0 0 0 / 60%);
+  color: #6b4a48;
+  cursor: pointer;
+}
+
+.warnDrehregler > span {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  transition: transform var(--dur-kurz) var(--ease);
+}
+
+/* Markierungsstrich zeigt die Stellung, an = eine Vierteldrehung */
+.warnDrehregler > span::before {
+  content: '';
+  position: absolute;
+  top: 5px;
+  width: 2px;
+  height: 9px;
+  border-radius: 1px;
+  background: #9aa4b0;
+}
+
+.warnDrehregler[aria-pressed='true'] > span {
+  transform: rotate(90deg);
+}
+
+.warnDrehregler svg {
+  width: 12px;
+  height: 12px;
+}
+
+.warnDrehregler[aria-pressed='true'][data-hell='true'] {
+  color: #ff4b3e;
+}
+
+/* Lautstärke als Touch-Leiste ohne Rastung */
+.touchLeiste {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  width: 92px;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(160deg, #1c2026, #07080a 50%, #15181c);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+.touchLeiste i {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: #3a4048;
+}
+
+.touchLeiste > span {
+  position: absolute;
+  top: calc(100% + 4px);
+  color: #9aa4b0;
+  font-family: var(--font);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+/* Tasten als flache Sensorflächen: gleich groß, kein Rand, kein Druckpunkt */
+.hardtaste[data-sensor='true'] {
+  min-width: 40px;
+  min-height: 30px;
+  border-color: transparent;
+  background: linear-gradient(160deg, #1a1e24, #0b0c0f 55%, #15181c);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
+  color: #6f7883;
+}
+
+.hardtaste[data-sensor='true'] svg {
+  width: 14px;
+  height: 14px;
+}
+
+.hardtaste[data-sensor='true']:active {
+  transform: none;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 6%);
 }
 
 .klavierlack {
@@ -2037,7 +2165,7 @@
 .cockpit[data-lesefluss='invertiert'] .clusterGrid {
   grid-template-areas:
     'fuss fuss fuss'
-    'drehzahl mitte tacho'
+    'leistung mitte tacho'
     'mini mini mini'
     'kopf kopf kopf';
 }
@@ -2439,12 +2567,12 @@
 }
 
 /* ---------- Kontrast-Sabotage ----------
- * Nur an festen Stellen (Tacho, Drehzahl, Statusleiste, Abbiegehinweis, Ankunftszeit),
+ * Nur an festen Stellen (Tacho, Leistung, Statusleiste, Abbiegehinweis, Ankunftszeit),
  * damit die anderen Effekte sichtbar bleiben. Kein Filter, keine Tönung:
  * Dunkelgrau auf Schwarz (etwa 1,6:1 statt mindestens 4,5:1), dünne und kleine Schrift.
  */
 
-.cockpit[data-kontrast='invertiert'] :is(.tachoBereich, .drehzahlBereich, .statusleiste, .manoever, .eta) {
+.cockpit[data-kontrast='invertiert'] :is(.tachoBereich, .leistungBereich, .statusleiste, .manoever, .eta) {
   --s: 0.8;
   --skala: 0.85;
   --tacho-gewicht: 200;
@@ -2481,7 +2609,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .blende,
-  .statusKlar,
   .glocke,
   .miniInstr,
   .werbung {
@@ -2494,6 +2621,7 @@
   .karteRollt,
   .hebel,
   .hebelMini span,
+  .warnDrehregler > span,
   .pedalPlatte {
     transition: none;
   }

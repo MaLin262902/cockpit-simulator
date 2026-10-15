@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useInterval } from '../hooks/useInterval';
-import { drehzahl, fahrschritt, startzustand, tempomatUmschalten, type Fahrzustand, type Pedale } from './fahrphysik';
+import { fahrschritt, leistung, startzustand, tempomatUmschalten, type Fahrzustand, type Pedale } from './fahrphysik';
 
 export type Blinker = 'links' | 'aus' | 'rechts';
 
@@ -11,8 +11,8 @@ interface Sim {
   /** km/h, gerundet */
   tempo: number;
   tempolimit: number;
-  /** Motordrehzahl in 1000/min */
-  drehzahl: number;
+  /** Antriebsleistung in kW (Elektroauto) */
+  leistung: number;
   /** Meter bis zur nächsten Kreuzung (Navi) */
   rest: number;
   /** Zähler der passierten Kreuzungen; ändert sich beim Abbiegen */
@@ -64,7 +64,7 @@ export function SimProvider({ children }: { children: ReactNode }) {
       takt,
       tempo,
       tempolimit: 50,
-      drehzahl: drehzahl(fahrt.tempo, pedale.gas),
+      leistung: leistung(fahrt.tempo, pedale),
       rest: fahrt.rest,
       kreuzungen: fahrt.kreuzungen,
       tempomat: fahrt.tempomat,

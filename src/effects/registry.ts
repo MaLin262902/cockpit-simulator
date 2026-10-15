@@ -14,7 +14,7 @@ export const EFFEKTE = {
   systemgrenzen: { bereich: 'Anzeige der Systemgrenzen' },
   gruppierung: { bereich: 'Gruppierung der App-Leiste' },
   lesefluss: { bereich: 'Anordnung und Lesefluss' },
-  stellteile: { bereich: 'Klimabedienung' },
+  stellteile: { bereich: 'Klimabedienung und Tasten der Mittelkonsole' },
   hinweis: { bereich: 'Textmeldung im Hauptdisplay' },
 } as const satisfies Record<string, { bereich: string }>;
 

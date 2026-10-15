@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { CockpitModel, Modus } from '../../effects/deriveCockpit';
 import { useBlinktakt } from '../../hooks/useBlinktakt';
+import { AKKU_PROZENT, akkuSpannung } from '../../sim/fahrphysik';
 import { useSim } from '../../sim/SimContext';
 import { AdasAnsicht } from './AdasAnsicht';
 import type { Fahrlage } from './Cockpit';
@@ -67,21 +68,21 @@ export function Kombiinstrument({ m, lage }: Props) {
           {m.systemgrenzen === 'korrekt' && <Systemgrenzen en={en} />}
         </div>
 
-        <div className={styles.drehzahlBereich}>
+        {/* Elektroauto: Leistungsanzeige statt Drehzahlmesser */}
+        <div className={styles.leistungBereich}>
           <Rundinstrument
-            wert={sim.drehzahl}
-            max={7}
-            schritt={1}
-            rotAb={6}
+            wert={sim.leistung}
+            max={150}
+            schritt={25}
             digital="D"
-            einheit={en ? 'RPM x1000' : '1/min × 1000'}
-            beschriftung="Drehzahlmesser, Gang D"
+            einheit="kW"
+            beschriftung={`Leistungsanzeige ${sim.leistung} kW, Fahrstufe D`}
           />
         </div>
 
         {m.ablenkung === 'invertiert' && <MiniAnzeigen />}
 
-        <Statusleiste en={en} sekunden={m.ablenkung === 'invertiert'} />
+        <Statusleiste en={en} sekunden={m.ablenkung === 'invertiert'} kw={sim.leistung} />
       </div>
     </section>
   );
@@ -139,15 +140,12 @@ function Kontrollleuchten({ modus, en, tempomat }: { modus: Modus; en: boolean; 
 
 function AssistStatus({ modus, en, aktiv }: { modus: Modus; en: boolean; aktiv: boolean }) {
   if (modus === 'invertiert') return null;
-  // Wie im echten Auto: grün = greift ein, grau = eingeschaltet, aber gerade nicht aktiv.
+  // Wie im echten Auto nur eine Kontrollleuchte: grün = greift ein, grau = eingeschaltet, aber gerade nicht aktiv.
+  const text = aktiv ? (en ? 'Lane Assist active' : 'Spurhalteassistent aktiv') : en ? 'Lane Assist standby' : 'Spurhalteassistent bereit';
   return (
-    <div key={String(aktiv)} className={styles.statusKlar} data-aktiv={aktiv} role="status">
+    <span className={styles.statusKlar} data-aktiv={aktiv} role="img" aria-label={text} title={text}>
       <I.Spur className={styles.statusSymbol} />
-      <span className={styles.statusText}>
-        <span>{en ? 'Lane Assist' : 'Spurhalteassistent'}</span>
-        <strong>{aktiv ? (en ? 'ACTIVE' : 'aktiv') : en ? 'STANDBY' : 'bereit'}</strong>
-      </span>
-    </div>
+    </span>
   );
 }
 
@@ -226,7 +224,23 @@ function Systemgrenzen({ en }: { en: boolean }) {
   );
 }
 
-function Statusleiste({ en, sekunden }: { en: boolean; sekunden: boolean }) {
+/**
+ * Akkustand. Korrekt in Prozent wie eine Tankanzeige; invertiert (reale Welt) die Spannung des Hochvoltakkus,
+ * die für die Fahrerin oder den Fahrer nichts über die verbleibende Energie aussagt.
+ */
+function Akku({ en, kw }: { en: boolean; kw: number }) {
+  const text = en ? `HV ${akkuSpannung(kw).toFixed(1)} V` : `${AKKU_PROZENT} %`;
+  return (
+    <span className={styles.akku} role="img" aria-label={en ? `Battery ${text}` : `Akku ${text}`}>
+      <span className={styles.akkuSymbol} aria-hidden="true">
+        {!en && <span style={{ width: `${AKKU_PROZENT}%` }} />}
+      </span>
+      {text}
+    </span>
+  );
+}
+
+function Statusleiste({ en, sekunden, kw }: { en: boolean; sekunden: boolean; kw: number }) {
   const uhrzeit = new Date().toLocaleTimeString(en ? 'en-US' : 'de-DE', {
     hour: '2-digit',
     minute: '2-digit',
@@ -234,9 +248,10 @@ function Statusleiste({ en, sekunden }: { en: boolean; sekunden: boolean }) {
   });
   const felder = en
     ? ['RNG 256 mi', '46 °F', uhrzeit, 'ODO 19,472 mi']
-    : ['Reichweite 412 km', '8 °C', uhrzeit, '31 337 km'];
+    : ['412 km', '8 °C', uhrzeit, '31 337 km'];
   return (
     <div className={styles.statusleiste}>
+      <Akku en={en} kw={kw} />
       {felder.map((f) => (
         <span key={f === uhrzeit ? 'uhr' : f}>{f}</span>
       ))}
@@ -244,7 +259,7 @@ function Statusleiste({ en, sekunden }: { en: boolean; sekunden: boolean }) {
   );
 }
 
-const MINI = ['Öl', 'Feuchte', 'Höhe', 'Kompass', 'Puls', 'Aktien', 'Mond', 'Schritte', 'kcal', 'Mails', 'Likes', 'Laut'];
+const MINI = ['Kühlung', 'Feuchte', 'Höhe', 'Kompass', 'Puls', 'Aktien', 'Mond', 'Schritte', 'kcal', 'Mails', 'Likes', 'Laut'];
 
 function MiniAnzeigen() {
   const { takt } = useSim();

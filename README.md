@@ -8,7 +8,7 @@ Farben in der ganzen App: **Grün** heißt „korrekt umgesetzt“, **Rot** hei�
 
 ## Das Cockpit
 
-- **Kombiinstrument** hinter dem Lenkrad: Tacho und Drehzahlmesser als Rundinstrumente, Fahrerassistenz-Ansicht mit Fahrspuren, Kontrollleuchten, Statusleiste.
+- **Kombiinstrument** hinter dem Lenkrad: Tacho und Leistungsanzeige (kW, Elektroauto) als Rundinstrumente, Akkustand in der Statusleiste, Fahrerassistenz-Ansicht mit Fahrspuren, Kontrollleuchten, Statusleiste.
 - **Hauptdisplay** in der Mitte: Navigationskarte mit Abbiegehinweis, Fahrspurempfehlung, Ankunftszeit und Zoom; Medienplayer; Reifendruck und Verbrauch; Klimaleiste mit Temperaturen und App-Leiste.
 - **Armaturenbrett** mit gepolsterter Oberkanteund Hutze über dem Kombiinstrument.
 - **Mittelkonsole**: Lüftungsdüsen und echte Tasten (Klima, Scheibenheizung, Sitzheizung, Lautstärke). Der Warnblinker lässt sich einschalten und blinkt im Kombiinstrument mit.
@@ -97,16 +97,16 @@ Alle Inhalte stehen in **`src/data/cards.ts`**. Eine Karte sieht so aus:
   |---|---|
   | `systemstatus` | Statusanzeige des Spurhalteassistenten |
   | `farblogik` | Kontrollleuchten: Symbole und Farben |
-  | `kontrast` | Dunkelgrau auf Schwarz bei Tacho, Drehzahl, Statusleiste, Abbiegehinweis und Ankunftszeit |
+  | `kontrast` | Dunkelgrau auf Schwarz bei Tacho, Leistungsanzeige, Statusleiste, Abbiegehinweis und Ankunftszeit |
   | `akustik` | Navi-Ansage ohne Inhalt („Weiter vorne abbiegen.“) bzw. mit Entfernung, Richtung und Straße |
   | `ablenkung` | Laufschrift, Werbung, Mini-Anzeigen |
   | `blickabwendung` | Geschwindigkeit im Untermenü bzw. immer sichtbar |
-  | `realeWelt` | Unverständliche Fehlermeldungen, mph, Englisch bzw. Klartext |
+  | `realeWelt` | Unverständliche Fehlermeldungen, mph, Akku in Volt, Englisch bzw. Klartext und Akku in % |
   | `tempowarner` | Tempowarner |
   | `systemgrenzen` | „Autopilot 100 % sicher“ bzw. Systemgrenzen |
   | `gruppierung` | App-Leiste gemischt bzw. thematisch gruppiert |
   | `lesefluss` | Layout gespiegelt, Blinker übereinander und vertauscht bzw. F-Muster |
-  | `stellteile` | Klima als verdrehter Schieberegler bzw. große Plus-/Minus-Tasten |
+  | `stellteile` | Klima als verdrehter Schieberegler, Warnblinker als Drehregler, Lautstärke als Touch-Leiste, Sensorflächen bzw. große Plus-/Minus-Tasten, Warnblinktaste, Lautstärkeknopf |
   | `hinweis` | Kein eigener Effekt: Bei Inversion erscheint der Text aus `sabotage` als Meldung im Hauptdisplay |
 
 - `kategorie` ist der **Bereich der Oberfläche**, nach dem die Kartenliste gruppiert wird (Farben, Icons und Kontrast; Anordnung; Bedienung; Inhalte, Sprache und Ton; Assistenzsysteme). Die Quelle (WCAG, Nielsen, EU-Verordnung …) steht in der Info zur Karte. Ein neuer Wert erscheint automatisch als eigene Gruppe am Ende. Die Reihenfolge in `cards.ts` bestimmt die Kartennummern.
@@ -136,7 +136,7 @@ src/
   data/cards.ts            Karteninhalte (hier bearbeiten)
   effects/                 Effekt-Liste und Berechnung des Cockpit-Zustands
   state/                   Kartenzustände (korrekt / invertiert)
-  sim/                     simulierte Fahrzeugdaten (Tempo, Drehzahl, Assistent, Warnblinker)
+  sim/                     simulierte Fahrzeugdaten (Tempo, Leistung, Akku, Assistent, Warnblinker)
   audio/                   Tonerzeugung (Web Audio API)
   components/              Oberfläche: Cockpit (Rundinstrumente, Assistenz-Ansicht, Hauptdisplay, Mittelkonsole),
                            Karten, Vergleich, Straße, QR-Code

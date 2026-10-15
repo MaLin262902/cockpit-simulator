@@ -12,7 +12,7 @@ interface Props {
   symbol?: ReactNode;
   einheit: string;
   zusatz?: string;
-  /** Ab hier wird die Skala rot (Drehzahlbereich). */
+  /** Ab hier wird die Skala rot. */
   rotAb?: number;
   beschriftung: string;
   dezimal?: boolean;
