@@ -1,0 +1,2523 @@
+/*
+ * Das Cockpit trägt jeden Effekt als data-Attribut (z. B. data-kontrast="invertiert").
+ * Die Regeln unten kombinieren diese Attribute; so stapeln sich die Sabotagen.
+ * Schriftgrößen hängen über cqi von der Breite des jeweiligen Displays ab.
+ * Blinkende Elemente: höchstens 1 Hz (WCAG 2.3.1 erlaubt bis zu 3 Blitze pro Sekunde).
+ */
+
+.cockpit {
+  --ck-screen: #05070a;
+  --ck-panel: #0d1116;
+  --ck-panel-2: #151b22;
+  --ck-line: #242c36;
+  --ck-text: #f1f4f8;
+  --ck-muted: #b2bcc8;
+  --ck-dim: #7d8896;
+  --ck-red: #ff6b5e;
+  --ck-red-bg: #c62828;
+  --ck-amber: #ffc24a;
+  --ck-green: #4bdc8e;
+  --ck-teal: #35d6c8;
+  --ck-blue: #84bfff;
+  --ck-dial: #7cc4ff;
+  --ck-nadel: #ff6a3d;
+  --ck-lane: #c9d1da;
+  --ck-lampe: #c9d1da;
+  --ck-font: var(--font);
+  --s: 1;
+  --skala: 1;
+  --min: 11px;
+  --gewicht: 500;
+  --tacho-gewicht: 300;
+
+  container: cockpit / inline-size;
+  position: relative;
+  padding: 40px 14px 10px;
+  border-radius: 48px 48px 18px 18px / 34px 34px 18px 18px;
+  /* Armaturenbrett: weiche Kunststoffoberfläche mit feiner Narbung, oben heller (Licht durch die Frontscheibe) */
+  background:
+    radial-gradient(110% 55% at 50% -8%, rgb(255 255 255 / 8%), transparent 62%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 1.2%) 0 1px, transparent 1px 4px),
+    linear-gradient(180deg, #1f2228, #14161a 38%, #0c0d10);
+  border: 1px solid #272b32;
+  box-shadow: var(--shadow), inset 0 1px 0 rgb(255 255 255 / 7%);
+  color: var(--ck-text);
+  font-family: var(--ck-font);
+  font-weight: var(--gewicht);
+}
+
+.cockpit[data-kontrast='korrekt'] {
+  --ck-text: #ffffff;
+  --ck-muted: #d5dce4;
+  --ck-dim: #b6c0cb;
+  --s: 1.2;
+  --skala: 1.12;
+  --min: 13px;
+  --gewicht: 600;
+  --tacho-gewicht: 700;
+}
+
+/* Oberkante des Armaturenbretts mit schmalem Ambientelicht */
+.cockpit::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 26px;
+  border-radius: 48px 48px 0 0 / 34px 34px 0 0;
+  background: linear-gradient(180deg, #353a43, #1c1f24);
+  box-shadow:
+    0 1px 0 rgb(53 214 200 / 40%),
+    0 4px 12px rgb(53 214 200 / 12%);
+  pointer-events: none;
+}
+
+.armaturen {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+@container cockpit (min-width: 760px) {
+  .armaturen {
+    grid-template-columns: 1.15fr 1fr;
+  }
+
+  .konsole {
+    transform: perspective(1800px) rotateY(-4deg);
+    transform-origin: left center;
+  }
+}
+
+.fahrerplatz {
+  position: relative;
+  min-width: 0;
+}
+
+/* Hutze: das Dach über dem Kombiinstrument schirmt es gegen Sonnenlicht ab */
+.fahrerplatz::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  left: -3%;
+  right: -3%;
+  top: -26px;
+  height: 90px;
+  border-radius: 50% 50% 0 0 / 80px 80px 0 0;
+  background: linear-gradient(180deg, #2d3139, #17191d 70%);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+  pointer-events: none;
+}
+
+/* Lenkrad und Lenkstockschalter; die Tasten liegen in Prozent über dem Lenkrad-SVG (viewBox 1000 × 400). */
+.lenkradBereich {
+  container: lenkrad / inline-size;
+  position: relative;
+  z-index: 2;
+  margin: -6% 0 0;
+}
+
+.lenkrad {
+  display: block;
+  width: 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 -6px 10px rgb(0 0 0 / 50%));
+}
+
+@container cockpit (max-width: 759px) {
+  .lenkradBereich {
+    z-index: 4;
+    height: 0;
+    margin: 0;
+  }
+
+  .lenkrad {
+    display: none;
+  }
+}
+
+.cluster,
+.center {
+  container-type: inline-size;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  isolation: isolate;
+  background: var(--ck-screen);
+  /* Bildschirmrahmen: dunkler Rand mit heller Kante, damit das Display rundum sichtbar abschließt */
+  border: 1px solid #353c46;
+  box-shadow:
+    0 0 0 4px #050608,
+    0 0 0 5px #2a3038,
+    0 14px 28px rgb(0 0 0 / 55%),
+    inset 0 0 0 3px #0a0c0f,
+    inset 0 20px 50px rgb(255 255 255 / 3%);
+  transition: background var(--dur) var(--ease);
+}
+
+.cluster {
+  z-index: 1;
+  border-radius: 26px 26px 20px 20px;
+  background: radial-gradient(90% 120% at 50% 0%, #0e141b, var(--ck-screen) 70%);
+}
+
+.center {
+  --z: 1.3;
+  border-radius: 18px;
+  margin-bottom: 16px;
+}
+
+.blende {
+  animation: einblenden var(--dur) var(--ease);
+}
+
+@keyframes einblenden {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Kombiinstrument ---------- */
+
+.clusterGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr 1fr;
+  grid-template-areas:
+    'kopf kopf kopf'
+    'tacho mitte drehzahl'
+    'mini mini mini'
+    'fuss fuss fuss';
+  gap: 1.2cqi 2cqi;
+  padding: 2.2cqi 3cqi 4.5cqi;
+  align-items: center;
+}
+
+@container (max-width: 540px) {
+  .clusterGrid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      'kopf kopf'
+      'tacho mitte'
+      'mini mini'
+      'fuss fuss';
+    gap: 2cqi;
+    padding: 3cqi 3cqi 3.5cqi;
+  }
+
+  .drehzahlBereich {
+    display: none !important;
+  }
+}
+
+/* Blinker links und rechts außen, beide oben auf derselben Höhe; dazwischen Leuchten und Status. */
+.kopf {
+  grid-area: kopf;
+  display: flex;
+  align-items: flex-start;
+  gap: 2cqi;
+  min-height: max(26px, 5cqi);
+}
+
+.kopfMitte {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5cqi 2cqi;
+  min-width: 0;
+}
+
+.kopf > .blinkerPfeil {
+  flex: none;
+  min-height: max(26px, 5cqi);
+}
+
+.kopfRechts {
+  display: flex;
+  align-items: center;
+  gap: 1.5cqi;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.tachoBereich,
+.drehzahlBereich {
+  display: flex;
+  justify-content: center;
+  min-width: 0;
+}
+
+.tachoBereich {
+  grid-area: tacho;
+}
+
+.drehzahlBereich {
+  grid-area: drehzahl;
+}
+
+/* Rundinstrumente */
+
+.rund {
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+  overflow: visible;
+}
+
+.rundSpur,
+.rundRot,
+.rundWert {
+  fill: none;
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.rundSpur {
+  stroke: var(--ck-line);
+}
+
+.rundRot {
+  stroke: #e5484d;
+  opacity: 0.85;
+}
+
+.rundWert {
+  stroke: var(--ck-dial);
+  filter: drop-shadow(0 0 4px var(--ck-dial));
+  transition: d 900ms var(--ease);
+}
+
+.rundStrich {
+  stroke: var(--ck-muted);
+  stroke-width: 2;
+}
+
+.rundStrichKlein {
+  stroke: var(--ck-dim);
+  stroke-width: 1.2;
+}
+
+.rundZahl {
+  fill: var(--ck-muted);
+  font-size: calc(13px * var(--skala));
+  font-weight: 600;
+}
+
+.nadel {
+  transition: transform 900ms var(--ease);
+}
+
+.nadel line {
+  stroke: var(--ck-nadel);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 3px var(--ck-nadel));
+}
+
+.rundDigital {
+  fill: var(--ck-text);
+  font-size: calc(36px * var(--s));
+  font-weight: var(--tacho-gewicht);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+.rundEinheit {
+  fill: var(--ck-muted);
+  font-size: calc(12px * var(--skala));
+  font-weight: 600;
+}
+
+.rundZusatz {
+  fill: var(--ck-amber);
+  font-size: calc(11px * var(--skala));
+  font-weight: 600;
+}
+
+/* Inversion Blickabwendung: Auto von hinten statt Geschwindigkeit */
+.rundAuto {
+  fill: #2a3038;
+  stroke: var(--ck-muted);
+  stroke-width: 1.5;
+}
+
+.rundAutoDach {
+  fill: #121820;
+}
+
+.rundAutoLicht {
+  fill: #ff5a4e;
+  stroke: none;
+}
+
+/* Mitte: Tempolimit und Fahrerassistenz-Ansicht */
+
+.mitte {
+  grid-area: mitte;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1cqi;
+  min-width: 0;
+}
+
+.mitteOben {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2cqi 2cqi;
+  min-height: max(32px, 7cqi);
+}
+
+.adas {
+  width: 100%;
+  max-width: 420px;
+  height: auto;
+  color: var(--ck-lane);
+}
+
+.adasLinie {
+  fill: none;
+  stroke: var(--ck-lane);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke var(--dur) var(--ease);
+}
+
+.adasNachbar {
+  fill: none;
+  stroke: var(--ck-dim);
+  stroke-width: 1.5;
+  stroke-dasharray: 6 7;
+  opacity: 0.6;
+}
+
+.adasSchlauch {
+  fill: transparent;
+  transition: fill var(--dur) var(--ease);
+}
+
+.adas[data-spur='aktiv'] .adasLinie {
+  stroke: var(--ck-green);
+  filter: drop-shadow(0 0 3px var(--ck-green));
+}
+
+.adas[data-spur='aus'] .adasLinie {
+  stroke: var(--ck-dim);
+  stroke-dasharray: 5 6;
+}
+
+.adasAuto rect {
+  fill: #4a5462;
+}
+
+.adasAuto .adasScheibe {
+  fill: #252c35;
+}
+
+.adasAuto .adasLicht {
+  fill: #ff4d4d;
+}
+
+.adasRahmen {
+  fill: none;
+  stroke: var(--ck-green);
+  stroke-width: 1.6;
+}
+
+/* Kontrollleuchten */
+
+.lampen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2cqi 3cqi;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.lampe {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqi;
+  color: var(--ck-lampe);
+  font-size: max(var(--min), calc(1.7cqi * var(--s)));
+  font-weight: 600;
+  transition: color var(--dur) var(--ease);
+}
+
+.lampenSymbol {
+  width: max(20px, 4cqi);
+  height: max(20px, 4cqi);
+  flex: none;
+}
+
+.cockpit[data-farblogik='korrekt'] .lampe[data-art='warnung'] {
+  color: var(--ck-amber);
+}
+
+.cockpit[data-farblogik='korrekt'] .lampe[data-art='aktiv'] {
+  color: var(--ck-green);
+}
+
+.cockpit[data-farblogik='invertiert'] .lampe[data-art='warnung'] {
+  color: #2fbf5b;
+}
+
+.cockpit[data-farblogik='invertiert'] .lampe[data-art='aktiv'] {
+  color: #ff3b30;
+}
+
+/* Status des Assistenten */
+
+.statusKlar {
+  display: flex;
+  align-items: center;
+  gap: 1cqi;
+  padding: 0.6cqi 1.4cqi;
+  border: 2px solid #8b97a4;
+  border-radius: 99px;
+  background: rgb(255 255 255 / 4%);
+  animation: hervorheben 900ms var(--ease);
+}
+
+.statusKlar[data-aktiv='true'] {
+  border-color: var(--ck-green);
+  background: rgb(75 220 142 / 13%);
+}
+
+.statusSymbol {
+  width: max(20px, 3.6cqi);
+  height: max(20px, 3.6cqi);
+  flex: none;
+}
+
+.statusKlar[data-aktiv='true'] .statusSymbol {
+  color: var(--ck-green);
+}
+
+.statusText {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  font-size: max(var(--min), calc(1.45cqi * var(--s)));
+  color: var(--ck-muted);
+}
+
+.statusText strong {
+  color: var(--ck-text);
+  font-size: 1.15em;
+}
+
+@keyframes hervorheben {
+  from {
+    transform: scale(1.06);
+    box-shadow: 0 0 0 0 rgb(255 255 255 / 55%);
+  }
+  to {
+    transform: scale(1);
+    box-shadow: 0 0 0 1.2cqi rgb(255 255 255 / 0%);
+  }
+}
+
+/* Akustik */
+
+.akustik {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqi;
+  color: var(--ck-muted);
+  font-size: max(var(--min), calc(1.5cqi * var(--s)));
+}
+
+.akustik svg {
+  width: max(20px, 3.6cqi);
+  height: max(20px, 3.6cqi);
+  flex: none;
+}
+
+.glocke {
+  color: var(--ck-amber);
+  animation: pulsieren 1s ease-in-out infinite alternate;
+}
+
+@keyframes pulsieren {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+
+/* Meta-Hinweise (gehören nicht zum Cockpit, deshalb immer gut lesbar) */
+@container (max-width: 540px) {
+  .akustikText {
+    display: none;
+  }
+}
+
+/* Tempowarner */
+
+.tempolimit {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqi;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.schild {
+  width: max(30px, 6.2cqi);
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  border: max(3px, 0.8cqi) solid #d32019;
+  color: #111;
+  font-family: var(--font);
+  font-weight: 700;
+  font-size: max(12px, 2.4cqi);
+  transition: box-shadow var(--dur) var(--ease);
+}
+
+.schild[data-ueber='true'] {
+  box-shadow: 0 0 0 max(3px, 0.6cqi) var(--ck-amber);
+}
+
+.tempoAlarm {
+  background: var(--ck-amber);
+  color: #1d1400;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: max(var(--min), calc(1.7cqi * var(--s)));
+  padding: 0.3em 0.55em;
+  border-radius: 0.8cqi;
+}
+
+.tempoDezent {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  color: var(--ck-amber);
+  font-weight: 700;
+  font-size: max(var(--min), calc(1.5cqi * var(--s)));
+}
+
+.tempoDezent svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.tempoAus {
+  color: var(--ck-muted);
+  font-size: max(var(--min), calc(1.5cqi * var(--s)));
+}
+
+/* Systemgrenzen */
+
+.grenzenSabotage {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.35em 0.7em;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #14532d, #1f8a4c);
+  color: #eafff1;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  font-size: max(var(--min), calc(1.7cqi * var(--s)));
+  box-shadow: 0 0 2cqi rgb(75 220 142 / 45%);
+}
+
+.grenzenSabotage .kleingedruckt {
+  font-size: 0.5em;
+  font-weight: 400;
+  opacity: 0.55;
+}
+
+.grenzenSabotage svg {
+  width: 1.3em;
+  height: 1.3em;
+  flex: none;
+}
+
+.grenzen {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.3em 0.9em;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  font-size: max(var(--min), calc(1.35cqi * var(--s)));
+  line-height: 1.25;
+}
+
+.grenzen li {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+}
+
+.grenzen li svg {
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
+}
+
+.grenzen li[data-art='gut'] svg {
+  color: var(--ck-green);
+}
+
+/* Statusleiste unten */
+
+.statusleiste {
+  grid-area: fuss;
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqi;
+  padding: 1cqi 2cqi 0;
+  border-top: 1px solid var(--ck-line);
+  color: var(--ck-muted);
+  font-size: max(var(--min), calc(1.5cqi * var(--s)));
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@container (max-width: 540px) {
+  .statusleiste span:last-child {
+    display: none;
+  }
+}
+
+/* ---------- Ablenkung: Laufschrift und Zusatzinstrumente ---------- */
+
+.laufschrift {
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 1.6cqi 3cqi 0;
+  padding: 0.3em 0;
+  border-radius: 6px;
+  background: #ffdf3d;
+  color: #1a1400;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: max(11px, 1.4cqi);
+}
+
+.laufschrift span {
+  display: inline-block;
+  padding-left: 100%;
+  animation: lauf 30s linear infinite;
+}
+
+@keyframes lauf {
+  to {
+    transform: translateX(-100%);
+  }
+}
+
+.mini {
+  grid-area: mini;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(max(34px, 5.6cqi), 1fr));
+  gap: 0.6cqi;
+}
+
+.miniInstr {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: hsl(var(--h) 85% 75%);
+  font-family: var(--font);
+  font-size: max(7px, 1cqi);
+  line-height: 1.1;
+  animation: farbwechsel 7s linear infinite;
+}
+
+.miniInstr svg {
+  width: 100%;
+  height: auto;
+}
+
+.miniSpur,
+.miniWert {
+  fill: none;
+  stroke-width: 4;
+}
+
+.miniSpur {
+  stroke: rgb(255 255 255 / 12%);
+}
+
+.miniWert {
+  stroke: hsl(var(--h) 85% 60%);
+  transform: rotate(-90deg);
+  transform-origin: 18px 18px;
+}
+
+.miniInstr text {
+  fill: currentColor;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+@keyframes farbwechsel {
+  to {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes wabern {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 100% 50%;
+  }
+}
+
+/* ---------- Hauptdisplay ---------- */
+
+.konsole {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.centerInner {
+  display: flex;
+  flex-direction: column;
+}
+
+.statusbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2cqi;
+  padding: 1.4cqi 2.4cqi;
+  border-bottom: 1px solid var(--ck-line);
+  color: var(--ck-muted);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  font-size: max(var(--min), calc(1.9cqi * var(--s) * var(--z)));
+}
+
+.statusbarMitte {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1cqi;
+}
+
+.statusbarRechts {
+  display: flex;
+  align-items: center;
+  gap: 1.6cqi;
+}
+
+.statusIcon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.chipLaut {
+  padding: 0.1em 0.6em;
+  border-radius: 99px;
+  background: #e0245e;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.85em;
+}
+
+.chipCode {
+  color: var(--ck-dim);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.85em;
+}
+
+.empfang {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 0.9em;
+}
+
+.empfang i {
+  width: 3px;
+  background: currentColor;
+  border-radius: 1px;
+}
+
+.empfang i:nth-child(1) {
+  height: 30%;
+}
+
+.empfang i:nth-child(2) {
+  height: 55%;
+}
+
+.empfang i:nth-child(3) {
+  height: 80%;
+}
+
+.empfang i:nth-child(4) {
+  height: 100%;
+}
+
+.hauptbereich {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.55fr 1fr;
+  gap: 1.4cqi;
+  padding: 1.4cqi;
+}
+
+@container (max-width: 520px) {
+  .hauptbereich {
+    grid-template-columns: 1fr;
+  }
+
+  .seite {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Navigation */
+
+.navi {
+  position: relative;
+  overflow: hidden;
+  min-height: max(230px, 46cqi);
+  border-radius: 1.6cqi;
+  background: #0f161e;
+}
+
+.naviKarte {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity var(--dur) var(--ease);
+}
+
+.karteGrund {
+  fill: #111a23;
+}
+
+.kartePark {
+  fill: #15281d;
+}
+
+.karteGewaesser {
+  fill: #12304a;
+}
+
+.karteBlock {
+  fill: #18222d;
+}
+
+.karteNebenstrasse {
+  fill: none;
+  stroke: #27323e;
+  stroke-width: 4;
+}
+
+.karteHauptstrasse {
+  fill: none;
+  stroke: #3a4757;
+  stroke-width: 9;
+}
+
+.karteLabel {
+  fill: #8794a3;
+  font-family: var(--font);
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.karteRouteGefahren {
+  fill: none;
+  stroke: #5a6573;
+  stroke-width: 6;
+}
+
+.karteRouteRand {
+  fill: none;
+  stroke: #0b3d75;
+  stroke-width: 10;
+  stroke-linejoin: round;
+}
+
+.karteRoute {
+  fill: none;
+  stroke: #4ca2ff;
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+.karteAssist {
+  fill: none;
+  stroke: var(--ck-teal);
+  stroke-width: 6;
+  stroke-linejoin: round;
+}
+
+.karteKeinAssist {
+  fill: none;
+  stroke: var(--ck-amber);
+  stroke-width: 6;
+  stroke-dasharray: 6 5;
+}
+
+.karteZiel path {
+  fill: #ff5a4f;
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.kartePositionKreis {
+  fill: rgb(76 162 255 / 18%);
+  stroke: rgb(76 162 255 / 50%);
+}
+
+.kartePosition {
+  fill: #fff;
+  stroke: #0b3d75;
+  stroke-width: 1.5;
+}
+
+.kartePoi {
+  stroke: #fff;
+  stroke-width: 1.5;
+}
+
+.navi[data-modus='korrekt'] .naviKarte {
+  opacity: 0.75;
+}
+
+.manoever,
+.eta,
+.naviKnopf,
+.assistLegende {
+  background: rgb(8 14 22 / 92%);
+  border: 1px solid var(--ck-line);
+}
+
+.manoever {
+  position: absolute;
+  top: 1.4cqi;
+  left: 1.4cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8cqi;
+  padding: 1.2cqi 1.6cqi;
+  border-radius: 1.4cqi;
+  font-size: max(var(--min), calc(2cqi * var(--s) * var(--z)));
+  line-height: 1.15;
+}
+
+.manoeverHaupt {
+  display: flex;
+  align-items: center;
+  gap: 1.2cqi;
+}
+
+.manoeverHaupt svg {
+  width: max(26px, 4.6cqi);
+  height: max(26px, 4.6cqi);
+  color: var(--ck-blue);
+  flex: none;
+}
+
+.manoeverHaupt > span {
+  display: flex;
+  flex-direction: column;
+}
+
+.manoeverHaupt strong {
+  font-size: 1.6em;
+}
+
+.spuren {
+  display: flex;
+  gap: 0.4cqi;
+  padding-top: 0.8cqi;
+  border-top: 1px solid var(--ck-line);
+}
+
+.spuren svg {
+  width: max(16px, 2.6cqi);
+  height: max(16px, 2.6cqi);
+  color: var(--ck-dim);
+}
+
+.spuren svg[data-empfohlen='true'] {
+  color: var(--ck-text);
+}
+
+.naviKnoepfe {
+  position: absolute;
+  top: 1.4cqi;
+  right: 1.4cqi;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8cqi;
+}
+
+.naviKnopf {
+  display: grid;
+  place-items: center;
+  width: max(32px, 4.4cqi);
+  height: max(32px, 4.4cqi);
+  border-radius: 1cqi;
+  color: var(--ck-text);
+}
+
+.naviKnopf svg {
+  width: 60%;
+  height: 60%;
+}
+
+.eta {
+  position: absolute;
+  left: 1.4cqi;
+  right: 1.4cqi;
+  bottom: 1.4cqi;
+  display: flex;
+  justify-content: space-between;
+  gap: 2cqi;
+  padding: 1cqi 1.8cqi;
+  border-radius: 1.2cqi;
+  color: var(--ck-muted);
+  font-variant-numeric: tabular-nums;
+  font-size: max(var(--min), calc(1.9cqi * var(--s) * var(--z)));
+}
+
+.eta strong {
+  color: var(--ck-green);
+}
+
+.assistLegende {
+  position: absolute;
+  left: 1.4cqi;
+  bottom: calc(1.4cqi + max(34px, 5.6cqi));
+  display: flex;
+  flex-direction: column;
+  gap: 0.4cqi;
+  padding: 0.8cqi 1.4cqi;
+  border-radius: 1cqi;
+  font-size: max(var(--min), calc(1.5cqi * var(--s) * var(--z)));
+}
+
+.assistLegende span {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.assistLegende i {
+  width: 1.6em;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ck-teal);
+}
+
+.assistLegende i[data-art='nein'] {
+  background: repeating-linear-gradient(90deg, var(--ck-amber) 0 5px, transparent 5px 9px);
+}
+
+.assistAlles {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.4em 0.9em;
+  border-radius: 99px;
+  background: linear-gradient(135deg, #14532d, #1f8a4c);
+  color: #eafff1;
+  font-weight: 800;
+  white-space: nowrap;
+  font-size: max(var(--min), calc(1.7cqi * var(--s) * var(--z)));
+  box-shadow: 0 0 2cqi rgb(75 220 142 / 45%);
+}
+
+.assistAlles svg {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+.benachrichtigungen {
+  position: absolute;
+  top: 1.4cqi;
+  right: calc(2.4cqi + max(32px, 4.4cqi));
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.8cqi;
+}
+
+.benachrichtigungen span {
+  padding: 0.8cqi 1.4cqi;
+  border-radius: 1.2cqi;
+  background: #2a3442;
+  color: #fff;
+  font-family: var(--font);
+  font-size: max(11px, 1.7cqi);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 40%);
+}
+
+/* Seitenleiste: Medien, Fahrzeug, Video */
+
+.seite {
+  display: flex;
+  flex-direction: column;
+  gap: 1.4cqi;
+  min-width: 0;
+}
+
+.medien,
+.fahrzeug {
+  padding: 1.4cqi;
+  border-radius: 1.6cqi;
+  border: 1px solid var(--ck-line);
+  background: var(--ck-panel-2);
+}
+
+.medien {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas:
+    'cover text'
+    'fort fort'
+    'knoepfe knoepfe';
+  align-items: center;
+  gap: 1cqi 1.4cqi;
+}
+
+.medien[data-kompakt='true'] {
+  grid-template-areas:
+    'cover text'
+    'knoepfe knoepfe';
+}
+
+.cover {
+  grid-area: cover;
+  width: max(44px, 7.5cqi);
+  aspect-ratio: 1;
+  border-radius: 1cqi;
+  background:
+    radial-gradient(circle at 30% 30%, #ff9f6e, transparent 45%),
+    radial-gradient(circle at 70% 70%, #7b5cff, transparent 50%),
+    linear-gradient(135deg, #1d2b64, #f8cdda);
+}
+
+.medienText {
+  grid-area: text;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--ck-muted);
+  font-size: max(var(--min), calc(1.7cqi * var(--s) * var(--z)));
+  line-height: 1.25;
+}
+
+.medienText > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.medienText strong {
+  color: var(--ck-text);
+  font-size: 1.15em;
+}
+
+.medienQuelle {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--ck-dim);
+  font-size: 0.85em;
+}
+
+.medienQuelle svg {
+  width: 1em;
+  height: 1em;
+  flex: none;
+}
+
+.fortschritt {
+  grid-area: fort;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.4cqi;
+  color: var(--ck-dim);
+  font-variant-numeric: tabular-nums;
+  font-size: max(var(--min), calc(1.35cqi * var(--s) * var(--z)));
+}
+
+.fortschrittBalken {
+  flex-basis: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--ck-line);
+  overflow: hidden;
+}
+
+.fortschrittBalken span {
+  display: block;
+  height: 100%;
+  background: var(--ck-blue);
+  transition: width 1s linear;
+}
+
+.medienKnoepfe {
+  grid-area: knoepfe;
+  display: flex;
+  justify-content: center;
+  gap: 2cqi;
+}
+
+.medienKnopf {
+  display: grid;
+  place-items: center;
+  width: max(36px, 5cqi);
+  height: max(36px, 5cqi);
+  border-radius: 50%;
+  border: 1px solid var(--ck-line);
+  background: transparent;
+  color: var(--ck-text);
+}
+
+.medienKnopf[data-haupt='true'] {
+  background: var(--ck-text);
+  color: var(--ck-screen);
+}
+
+.medienKnopf svg {
+  width: 50%;
+  height: 50%;
+}
+
+.fahrzeug {
+  display: flex;
+  flex-direction: column;
+  gap: 1cqi;
+  font-size: max(var(--min), calc(1.55cqi * var(--s) * var(--z)));
+}
+
+.fahrzeugKopf {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1cqi;
+  color: var(--ck-muted);
+  font-weight: 600;
+}
+
+.reifenRaster {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  grid-template-areas:
+    'vl bild vr'
+    'hl bild hr';
+  align-items: center;
+  gap: 0.6cqi 1.2cqi;
+}
+
+.reifen {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--ck-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.reifen svg {
+  width: 1em;
+  height: 1em;
+}
+
+.reifen[data-pos='VL'] {
+  grid-area: vl;
+  justify-content: flex-end;
+}
+
+.reifen[data-pos='VR'] {
+  grid-area: vr;
+}
+
+.reifen[data-pos='HL'] {
+  grid-area: hl;
+  justify-content: flex-end;
+}
+
+.reifen[data-pos='HR'] {
+  grid-area: hr;
+}
+
+.fahrzeugBild {
+  grid-area: bild;
+  width: max(24px, 3.6cqi);
+  height: auto;
+}
+
+.fahrzeugBild rect {
+  fill: #3a4452;
+}
+
+.fahrzeugBild .fahrzeugScheibe {
+  fill: #1b222b;
+}
+
+.fahrzeug[data-farblogik='korrekt'] .reifen[data-niedrig='true'] {
+  color: var(--ck-amber);
+}
+
+.fahrzeug[data-farblogik='korrekt'] .reifen[data-niedrig='true'] {
+  font-weight: 800;
+}
+
+.fahrzeug[data-farblogik='invertiert'] .reifen[data-niedrig='true'] {
+  color: #2fbf5b;
+}
+
+.fahrzeug[data-farblogik='invertiert'] .reifen[data-niedrig='false'] {
+  color: #ff3b30;
+}
+
+.verbrauch {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 1cqi;
+  padding-top: 0.8cqi;
+  border-top: 1px solid var(--ck-line);
+  color: var(--ck-dim);
+}
+
+.standHinweis {
+  padding: 1cqi;
+  border: 1px dashed var(--ck-line);
+  border-radius: 1.2cqi;
+  color: var(--ck-muted);
+  text-align: center;
+  font-size: max(var(--min), calc(1.5cqi * var(--s) * var(--z)));
+}
+
+/* Werbung als eigene Kachel in der Seitenleiste: lenkt ab, verdeckt aber keine anderen Effekte. */
+.werbung {
+  padding: 1.2cqi 1.4cqi;
+  border-radius: 1.4cqi;
+  background: linear-gradient(110deg, #ff4fa3, #ff9f2e, #7b5cff, #ff4fa3);
+  background-size: 300% 100%;
+  animation: wabern 9s ease-in-out infinite alternate;
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: max(11px, calc(1.6cqi * var(--z)));
+  line-height: 1.2;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
+}
+
+.werbungKlein {
+  display: block;
+  font-weight: 500;
+  font-size: 0.72em;
+}
+
+.meldungen {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8cqi;
+  padding: 0 1.4cqi 1.4cqi;
+}
+
+.meldung {
+  padding: 1cqi 1.6cqi;
+  border-left: 4px solid var(--ck-amber);
+  border-radius: 1cqi;
+  background: rgb(255 194 74 / 9%);
+  font-size: max(var(--min), calc(1.8cqi * var(--s) * var(--z)));
+  line-height: 1.3;
+}
+
+.meldung[data-modus='invertiert'] {
+  border-left-color: #ff3b30;
+  background: rgb(255 59 48 / 9%);
+  font-family: ui-monospace, Consolas, monospace;
+}
+
+.meldung[data-modus='korrekt'] {
+  border-left-color: var(--ck-blue);
+  background: rgb(132 191 255 / 10%);
+}
+
+/* Klimaleiste mit App-Leiste */
+
+.klimaleiste {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.4cqi;
+  padding: 1cqi 1.6cqi;
+  border-top: 1px solid var(--ck-line);
+  background: var(--ck-panel);
+}
+
+.temperatur {
+  display: flex;
+  align-items: center;
+  gap: 0.8cqi;
+  flex: none;
+}
+
+.tempWert {
+  min-width: 3.2em;
+  text-align: center;
+  color: var(--ck-text);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  font-size: max(var(--min), calc(2.3cqi * var(--s) * var(--z)));
+}
+
+.klimaKnopf {
+  display: grid;
+  place-items: center;
+  width: max(40px, 5cqi);
+  height: max(40px, 5cqi);
+  border-radius: 1cqi;
+  border: 1px solid var(--ck-line);
+  background: var(--ck-panel-2);
+  color: var(--ck-text);
+}
+
+.klimaKnopf svg {
+  width: 55%;
+  height: 55%;
+}
+
+.dock {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6cqi;
+}
+
+/* Gruppierte App-Leiste: eigene Zeile oben, Temperaturen darunter links und rechts. */
+.klimaleiste[data-gruppiert='true'] {
+  flex-wrap: wrap;
+}
+
+.klimaleiste[data-gruppiert='true'] .dock {
+  order: -1;
+  flex-basis: 100%;
+  flex-wrap: wrap;
+}
+
+.klimaleiste[data-gruppiert='true'] .app {
+  min-height: 46px;
+}
+
+.app {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3em;
+  min-width: max(44px, 6.6cqi);
+  min-height: 44px;
+  padding: 0.5cqi 0.8cqi;
+  border-radius: 1.2cqi;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ck-muted);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: max(var(--min), calc(1.3cqi * var(--s) * var(--z)));
+}
+
+.app svg {
+  width: max(18px, 2.7cqi);
+  height: max(18px, 2.7cqi);
+}
+
+.app[aria-pressed='true'] {
+  color: var(--ck-text);
+  background: rgb(132 191 255 / 14%);
+  border-color: rgb(132 191 255 / 35%);
+}
+
+.klimaleiste[data-direkt='true'] .app {
+  min-height: 52px;
+  border-color: var(--ck-line);
+  background: var(--ck-panel-2);
+  font-size: max(var(--min), calc(1.55cqi * var(--s) * var(--z)));
+}
+
+.klimaleiste[data-direkt='true'] .app[aria-pressed='true'] {
+  background: rgb(132 191 255 / 16%);
+  border-color: var(--ck-blue);
+}
+
+.isaKnopf[aria-pressed='true'] {
+  color: var(--ck-green);
+  border-color: var(--ck-green) !important;
+}
+
+.menueSymbol {
+  font-size: 1.6em;
+  line-height: 1;
+}
+
+@container (max-width: 520px) {
+  .klimaleiste {
+    flex-wrap: wrap;
+  }
+
+  .dock {
+    order: 3;
+    flex-basis: 100%;
+  }
+}
+
+/* Menü (nur bei invertierten Bedienwegen) */
+
+.menue {
+  position: absolute;
+  inset: 0;
+  z-index: 1000; /* immer über verschobenen Kacheln */
+  display: flex;
+  flex-direction: column;
+  gap: 1.4cqi;
+  padding: 2cqi;
+  background: color-mix(in srgb, var(--ck-screen) 96%, transparent);
+}
+
+.menueKopf {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2cqi;
+}
+
+.menuePfad {
+  color: var(--ck-muted);
+  font-size: max(var(--min), calc(1.8cqi * var(--s) * var(--z)));
+}
+
+.menuePunkt,
+.menueZurueck,
+.menueZu {
+  min-height: 30px;
+  padding: 0.3em 0.8em;
+  border-radius: 1.2cqi;
+  border: 1px solid var(--ck-line);
+  background: var(--ck-panel-2);
+  color: var(--ck-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: max(var(--min), calc(1.7cqi * var(--s) * var(--z)));
+}
+
+.menuePunkt {
+  text-align: left;
+}
+
+.menueZu {
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
+  font-size: 18px;
+}
+
+.menueListe {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1cqi;
+}
+
+.menueInhalt {
+  padding: 1.6cqi 2cqi;
+  border-radius: 1.4cqi;
+  background: var(--ck-panel-2);
+  font-size: max(var(--min), calc(2cqi * var(--s) * var(--z)));
+}
+
+.menueTempo {
+  font-size: 1.6em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.menueZurueck {
+  align-self: flex-start;
+  background: transparent;
+}
+
+/* ---------- Mittelkonsole: Düsen und echte Tasten ---------- */
+
+.bedienteil {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 4%;
+  padding: 10px 14px 8px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, #121519, #0c0e11);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 4%);
+}
+
+.duesen {
+  display: flex;
+  justify-content: center;
+  gap: 12%;
+}
+
+.duese {
+  flex: 0 1 34%;
+  height: 22px;
+  border-radius: 6px;
+  background: repeating-linear-gradient(180deg, #2a3038 0 3px, #090b0d 3px 6px);
+  box-shadow:
+    inset 0 0 0 2px #1d2228,
+    inset 0 4px 8px rgb(0 0 0 / 60%);
+}
+
+.tastenreihe {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.tastenreihe[data-beschriftet='true'] {
+  padding-bottom: 14px;
+}
+
+.hardtaste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-width: 48px;
+  min-height: 40px;
+  padding: 4px 8px;
+  border-radius: 8px;
+  border: 1px solid #2a3038;
+  background: linear-gradient(180deg, #23282f, #16191e);
+  color: #c9d1da;
+  font-family: var(--font);
+  font-size: 11px;
+  font-weight: 600;
+  box-shadow: 0 2px 0 #050608;
+}
+
+.hardtaste svg {
+  width: 20px;
+  height: 20px;
+}
+
+.hardtaste:active,
+.warnblinkTaste:active {
+  transform: translateY(1px);
+  box-shadow: none;
+}
+
+.warnblinkTaste {
+  display: grid;
+  place-items: center;
+  width: 54px;
+  height: 42px;
+  border-radius: 8px;
+  border: 1px solid #45302f;
+  background: linear-gradient(180deg, #2c1e20, #1a1214);
+  color: #ff4b3e;
+  box-shadow: 0 2px 0 #050608;
+}
+
+.warnblinkTaste svg {
+  width: 26px;
+  height: 26px;
+}
+
+/* Blinktakt kommt aus useBlinktakt (data-hell), damit er auch bei reduzierter Bewegung läuft. */
+.warnblinkTaste[aria-pressed='true'][data-hell='false'] svg {
+  opacity: 0.15;
+}
+
+.drehknopf {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #4a525c, #1a1d22 62%);
+  box-shadow:
+    0 0 0 3px #0a0c0e,
+    0 3px 6px rgb(0 0 0 / 60%);
+}
+
+.drehknopf span {
+  position: absolute;
+  top: calc(100% + 4px);
+  color: #9aa4b0;
+  font-family: var(--font);
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.klavierlack {
+  flex: 1;
+  max-width: 160px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(160deg, #1c2026, #07080a 50%, #15181c);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
+}
+
+/* ---------- Blinker (Anordnung je nach Karte „Lesefluss“) ---------- */
+
+.blinkerPfeil {
+  display: inline-grid;
+  place-items: center;
+  color: var(--ck-green);
+  opacity: 0.14;
+}
+
+.blinkerPfeil svg {
+  width: max(20px, 3.4cqi);
+  height: max(20px, 3.4cqi);
+}
+
+.blinkerPfeil[data-an='true'] {
+  opacity: 1;
+}
+
+.blinkerStapel {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.blinkerStapel svg {
+  width: max(16px, 2.4cqi);
+  height: max(16px, 2.4cqi);
+}
+
+/* ---------- Hauptdisplay: Ansichten ---------- */
+
+.hauptansicht {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: max(230px, 46cqi);
+}
+
+.hauptansicht > .navi {
+  flex: 1;
+}
+
+.vollansicht {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4cqi;
+  padding: 1.6cqi;
+  border-radius: 1.6cqi;
+  background: var(--ck-panel-2);
+  border: 1px solid var(--ck-line);
+  font-size: max(var(--min), calc(1.8cqi * var(--s) * var(--z)));
+}
+
+.vollTitel {
+  font-size: 1.15em;
+  color: var(--ck-text);
+}
+
+.medienGross {
+  display: flex;
+  gap: 2cqi;
+  align-items: center;
+}
+
+.coverGross {
+  width: max(90px, 16cqi);
+  flex: none;
+}
+
+.medienGross .medienText {
+  flex: 1;
+  gap: 0.6cqi;
+}
+
+.liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.liste li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1cqi;
+  padding: 1cqi 0.6cqi;
+  border-bottom: 1px solid var(--ck-line);
+  color: var(--ck-muted);
+}
+
+.liste li[data-aktiv='true'] {
+  color: var(--ck-text);
+  font-weight: 700;
+}
+
+.listeRechts {
+  display: flex;
+  align-items: center;
+  gap: 1.4cqi;
+}
+
+.appRaster {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.2cqi;
+}
+
+.appRaster[data-gruppierung='invertiert'] {
+  grid-template-columns: 1fr 1.6fr 0.7fr;
+}
+
+.appKachel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: max(64px, 10cqi);
+  border-radius: 1.4cqi;
+  border: 1px solid var(--ck-line);
+  background: var(--ck-panel);
+  color: var(--ck-text);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: inherit;
+}
+
+.appKachel svg {
+  width: max(24px, 3.6cqi);
+  height: max(24px, 3.6cqi);
+}
+
+.appKachel[aria-pressed='true'] {
+  border-color: var(--ck-blue);
+}
+
+.untertitel {
+  position: absolute;
+  z-index: 2;
+  left: 50%;
+  bottom: calc(1.4cqi + max(38px, 6cqi));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  width: max-content;
+  max-width: 92%;
+  padding: 0.7cqi 1.4cqi;
+  border-radius: 99px;
+  background: rgb(8 14 22 / 94%);
+  border: 1px solid var(--ck-line);
+  color: var(--ck-text);
+  font-size: max(var(--min), calc(1.6cqi * var(--s) * var(--z)));
+  animation: einblenden var(--dur) var(--ease);
+}
+
+.untertitel svg {
+  width: 1.2em;
+  height: 1.2em;
+  flex: none;
+  color: var(--ck-blue);
+}
+
+.untertitel[data-modus='invertiert'] {
+  font-style: italic;
+}
+
+/* Klima-Stellteile */
+
+.temperatur[data-gross='true'] .klimaKnopf {
+  width: max(48px, 6.2cqi);
+  height: max(48px, 6.2cqi);
+}
+
+.tempWert small {
+  display: block;
+  color: var(--ck-muted);
+  font-size: 0.55em;
+  font-weight: 600;
+}
+
+.klimaSchieber {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2em;
+  width: max(80px, 11cqi);
+  color: var(--ck-dim);
+  font-size: max(8px, 1cqi);
+  line-height: 1.1;
+  text-align: center;
+}
+
+.klimaSchieber input {
+  width: 100%;
+  height: 6px;
+  accent-color: #6b7280;
+}
+
+/* Gruppierte App-Leiste */
+
+.dock[data-gruppierung='korrekt'] {
+  gap: 1.6cqi;
+}
+
+/* Gruppe mit Überschrift: Die Breite richtet sich nach Überschrift oder Inhalt, je nachdem was breiter ist. */
+.appGruppe {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.3em;
+  flex: none;
+  padding: 0.35em 0.5cqi 0.5cqi;
+  border-radius: 1.2cqi;
+  border: 1px solid var(--ck-line);
+}
+
+.appGruppeTitel {
+  padding: 0 0.4em;
+  color: var(--ck-dim);
+  font-size: 0.68em;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.appGruppeInhalt {
+  display: flex;
+  justify-content: center;
+  gap: 0.4cqi;
+}
+
+.menueReihe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1cqi;
+}
+
+.menuePunkt[aria-pressed='true'] {
+  border-color: var(--ck-blue);
+}
+
+/* ---------- Lesefluss-Sabotage: alles gespiegelt, Wichtiges unten rechts ---------- */
+
+.cockpit[data-lesefluss='invertiert'] .clusterGrid {
+  grid-template-areas:
+    'fuss fuss fuss'
+    'drehzahl mitte tacho'
+    'mini mini mini'
+    'kopf kopf kopf';
+}
+
+.cockpit[data-lesefluss='invertiert'] .kopfMitte {
+  flex-direction: row-reverse;
+}
+
+@container (min-width: 521px) {
+  .cockpit[data-lesefluss='invertiert'] .hauptbereich {
+    grid-template-columns: 1fr 1.55fr;
+  }
+}
+
+.cockpit[data-lesefluss='invertiert'] .seite {
+  order: -1;
+}
+
+.cockpit[data-lesefluss='invertiert'] .manoever {
+  top: auto;
+  left: auto;
+  right: 1.4cqi;
+  bottom: 1.4cqi;
+}
+
+/* Untertitel weicht nach unten links aus, damit er den Abbiegehinweis nicht verdeckt. */
+.cockpit[data-lesefluss='invertiert'] .untertitel {
+  left: 1.4cqi;
+  bottom: 1.4cqi;
+  transform: none;
+  max-width: 52%;
+}
+
+.cockpit[data-lesefluss='invertiert'] .eta {
+  top: 1.4cqi;
+  bottom: auto;
+  flex-direction: row-reverse;
+  right: calc(2.4cqi + max(32px, 4.4cqi));
+}
+
+.cockpit[data-lesefluss='invertiert'] .naviKnoepfe {
+  right: auto;
+  left: 1.4cqi;
+}
+
+@container (max-width: 540px) {
+  .cockpit[data-lesefluss='invertiert'] .clusterGrid {
+    grid-template-areas:
+      'fuss fuss'
+      'mitte tacho'
+      'mini mini'
+      'kopf kopf';
+  }
+}
+
+/* Navi-Karte rollt mit der Fahrt (Wert alle 100 ms, dazwischen weich) */
+.karteRollt {
+  transition: transform 100ms linear;
+}
+
+/* ---------- Fußraum: Lenkstockschalter, Tempomat, Pedale ---------- */
+
+.fussraum {
+  position: relative;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 12px;
+  margin-top: 6px;
+  padding: 0 2% 4px;
+  font-family: var(--font);
+}
+
+/* Tempomat mittig, Pedale rechts unter dem Lenkrad */
+.fussraum .tempomatTaste {
+  grid-column: 2;
+}
+
+.fussraum .pedale {
+  grid-column: 3;
+  justify-self: end;
+}
+
+/* Ohne Lenkrad (Handy, Vergleich): eine Reihe Tempomat | Pedale | Lenkstockschalter */
+@container cockpit (max-width: 759px) {
+  .fussraum {
+    grid-template-columns: auto 1fr auto;
+    margin-top: 12px;
+  }
+
+  .fussraum .tempomatTaste {
+    grid-column: 1;
+  }
+
+  .fussraum .pedale {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .fussraum::after {
+    content: '';
+    grid-column: 3;
+    width: 84px;
+    height: 76px;
+  }
+}
+
+/* Lenkstockschalter: Fläche über der Hebelspitze, obere Hälfte drückt nach oben, untere nach unten */
+.lenkstock {
+  position: absolute;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+}
+
+@container cockpit (min-width: 760px) {
+  .lenkstock {
+    left: 81%;
+    right: 0;
+    top: calc(244 / 400 * 100%);
+    bottom: 0;
+  }
+
+  .hebelMini {
+    display: none !important;
+  }
+}
+
+/* Ohne Lenkrad: kleiner Hebel rechts in der Reihe des Fußraums */
+@container cockpit (max-width: 759px) {
+  .lenkstock {
+    z-index: 4;
+    top: 30px;
+    right: 2%;
+    width: 84px;
+    height: 76px;
+  }
+}
+
+.hebelZone {
+  position: relative;
+  z-index: 1;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.hebelZone:disabled {
+  cursor: default;
+}
+
+.hebelZone:not(:disabled):hover {
+  background: rgb(255 255 255 / 4%);
+}
+
+.hebelZone[data-zone='oben']:not(:disabled):hover {
+  cursor: n-resize;
+}
+
+.hebelZone[data-zone='unten']:not(:disabled):hover {
+  cursor: s-resize;
+}
+
+.hebelMini {
+  position: absolute;
+  top: calc(50% - 7px);
+  left: 0;
+  width: 100%;
+  height: 14px;
+}
+
+.hebelMini span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 7px 99px 99px 7px;
+  background: linear-gradient(180deg, #3b4048, #16191d);
+  border: 1px solid #2c3138;
+  transform-origin: 0 50%;
+  transition: transform var(--dur-kurz) var(--ease);
+}
+
+.hebelMini[data-stellung='links'] span {
+  transform: rotate(-14deg);
+}
+
+.hebelMini[data-stellung='rechts'] span {
+  transform: rotate(14deg);
+}
+
+/* Hebel im Lenkrad-SVG: dreht an der Lenksäule, Spitze oben = links, unten = rechts */
+.hebel {
+  transform-box: view-box;
+  transform-origin: 540px 313px;
+  transition: transform var(--dur-kurz) var(--ease);
+}
+
+.hebel[data-stellung='links'] {
+  transform: rotate(-4deg);
+}
+
+.hebel[data-stellung='rechts'] {
+  transform: rotate(4deg);
+}
+
+.tempomatTaste {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 44px;
+  padding: 0.3em 0.8em;
+  border-radius: 10px;
+  border: 1px solid #2e353e;
+  background: #15191e;
+  color: var(--ck-muted);
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tempomatTaste strong {
+  font-size: 14px;
+}
+
+.tempomatTaste[aria-pressed='true'] {
+  border-color: var(--ck-green);
+  color: var(--ck-green);
+}
+
+.pedale {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.pedal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ck-muted);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Gummiauflage mit Rillen; Bremse breit, Gas schmal und hoch */
+.pedalPlatte {
+  display: block;
+  border-radius: 8px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 5px, rgb(0 0 0 / 45%) 5px 7px),
+    linear-gradient(180deg, #3b4149, #1d2025);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%),
+    0 6px 0 #0a0b0d,
+    0 8px 14px rgb(0 0 0 / 55%);
+  transition:
+    transform 80ms ease-out,
+    box-shadow 80ms ease-out;
+}
+
+.pedal[data-art='bremse'] .pedalPlatte {
+  width: 76px;
+  height: 52px;
+}
+
+.pedal[data-art='gas'] .pedalPlatte {
+  width: 40px;
+  height: 78px;
+}
+
+.pedal[aria-pressed='true'] .pedalPlatte {
+  transform: translateY(5px) scaleY(0.94);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%),
+    0 1px 0 #0a0b0d,
+    0 2px 6px rgb(0 0 0 / 55%);
+}
+
+.pedal[aria-pressed='true'][data-art='bremse'] .pedalName {
+  color: var(--ck-red);
+}
+
+.pedal[aria-pressed='true'][data-art='gas'] .pedalName {
+  color: var(--ck-green);
+}
+
+/* ---------- Verschiebbare Kacheln im Hauptdisplay ---------- */
+
+.kachel {
+  position: relative;
+  min-width: 0;
+  cursor: grab;
+  touch-action: auto;
+}
+
+.kachel[data-zieht='true'] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.kachel[data-zieht='true'] > :first-child,
+.kachel[data-verschoben='true'] > :first-child {
+  box-shadow: 0 12px 28px rgb(0 0 0 / 55%);
+}
+
+.kachel :is(button, input, a, label) {
+  cursor: pointer;
+}
+
+/* Griffleiste oben mittig: verdeckt keine Bedienelemente und ist auf dem Handy der Ort zum Ziehen */
+.griff {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 50%;
+  width: 44px;
+  height: 14px;
+  transform: translateX(-50%);
+  opacity: 0.45;
+  touch-action: none;
+  transition: opacity var(--dur-kurz) var(--ease);
+}
+
+.griff::before {
+  content: "";
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  top: 4px;
+  height: 4px;
+  border-radius: 99px;
+  background: var(--ck-dim);
+}
+
+.kachel:hover > .griff,
+.kachel[data-zieht='true'] > .griff {
+  opacity: 1;
+}
+
+/* ---------- Farbcodierung und Symbolkonventionen invertiert ----------
+ * Farben ohne Bedeutung: Blinker in Magenta, jede App in einer anderen Signalfarbe,
+ * Spurhalten in Alarmrot, Empfangsbalken spiegelverkehrt.
+ */
+
+.cockpit[data-farblogik='invertiert'] .blinkerPfeil {
+  color: #e040fb;
+}
+
+.cockpit[data-farblogik='invertiert'] .app:nth-child(4n + 1) svg {
+  color: #ff4d4d;
+}
+
+.cockpit[data-farblogik='invertiert'] .app:nth-child(4n + 2) svg {
+  color: #ffd23f;
+}
+
+.cockpit[data-farblogik='invertiert'] .app:nth-child(4n + 3) svg {
+  color: #3ddc84;
+}
+
+.cockpit[data-farblogik='invertiert'] .app:nth-child(4n) svg {
+  color: #c084fc;
+}
+
+.cockpit[data-farblogik='invertiert'] .naviKnopf svg,
+.cockpit[data-farblogik='invertiert'] .statusIcon {
+  color: #ff4d4d;
+}
+
+.cockpit[data-farblogik='invertiert'] .hardtaste svg {
+  color: #ffd23f;
+}
+
+.cockpit[data-farblogik='invertiert'] .adas[data-spur='aktiv'] .adasLinie {
+  stroke: #ff3b30;
+}
+
+.cockpit[data-farblogik='invertiert'] .empfang {
+  transform: scaleX(-1);
+}
+
+/* Uhr mit Sekunden: feste Ziffernbreite, damit nichts springt */
+.uhr {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Kontrast-Sabotage ----------
+ * Nur an festen Stellen (Tacho, Drehzahl, Statusleiste, Abbiegehinweis, Ankunftszeit),
+ * damit die anderen Effekte sichtbar bleiben. Kein Filter, keine Tönung:
+ * Dunkelgrau auf Schwarz (etwa 1,6:1 statt mindestens 4,5:1), dünne und kleine Schrift.
+ */
+
+.cockpit[data-kontrast='invertiert'] :is(.tachoBereich, .drehzahlBereich, .statusleiste, .manoever, .eta) {
+  --s: 0.8;
+  --skala: 0.85;
+  --tacho-gewicht: 200;
+  font-weight: 300;
+}
+
+.cockpit[data-kontrast='invertiert'] :is(.rundDigital, .rundZahl, .rundEinheit) {
+  fill: #30363e;
+  font-weight: 200;
+}
+
+.cockpit[data-kontrast='invertiert'] .rundStrich {
+  stroke: #262b32;
+}
+
+.cockpit[data-kontrast='invertiert'] .statusleiste {
+  color: #30363e;
+}
+
+.cockpit[data-kontrast='invertiert'] .manoever,
+.cockpit[data-kontrast='invertiert'] .eta {
+  background: #0b0e12;
+  border-color: #14181d;
+  color: #343a42;
+}
+
+.cockpit[data-kontrast='invertiert'] .eta strong,
+.cockpit[data-kontrast='invertiert'] .manoever svg,
+.cockpit[data-kontrast='invertiert'] .spuren svg {
+  color: #343a42;
+}
+
+/* ---------- Reduzierte Bewegung ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .blende,
+  .statusKlar,
+  .glocke,
+  .miniInstr,
+  .werbung {
+    animation: none;
+  }
+
+  .nadel,
+  .rundWert,
+  .fortschrittBalken span,
+  .karteRollt,
+  .hebel,
+  .hebelMini span,
+  .pedalPlatte {
+    transition: none;
+  }
+
+  .untertitel {
+    animation: none;
+  }
+
+  .laufschrift span {
+    animation: none;
+    padding-left: 0.6em;
+  }
+}

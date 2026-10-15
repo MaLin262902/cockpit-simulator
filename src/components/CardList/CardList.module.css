@@ -1,0 +1,139 @@
+.liste {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.titel {
+  font-size: 1rem;
+}
+
+.anleitung {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
+.klappe {
+  display: grid;
+  place-items: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  flex: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 1.2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.klappe:hover {
+  background: var(--surface-3);
+}
+
+.gruppe {
+  border-top: 1px solid var(--border);
+  padding-top: 0.4rem;
+}
+
+.gruppe summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.gruppe summary::-webkit-details-marker {
+  display: none;
+}
+
+.gruppe summary::before {
+  content: '▸';
+  color: var(--text-muted);
+  transition: transform var(--dur-kurz) var(--ease);
+}
+
+.gruppe[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.thema {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.zaehler {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.zaehler > span {
+  min-width: 1.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 99px;
+  text-align: center;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.zaehler > span[data-art='invertiert'] {
+  background: var(--inversion-strong);
+  color: #fff;
+}
+
+.karten {
+  list-style: none;
+  margin: 0.3rem 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Eingeklappt: schmale Schiene mit Zähler */
+
+.schiene {
+  position: sticky;
+  top: clamp(16px, 1.6vw, 28px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.schieneText {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .schiene {
+    position: static;
+    flex-direction: row;
+  }
+
+  .schieneText {
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+}

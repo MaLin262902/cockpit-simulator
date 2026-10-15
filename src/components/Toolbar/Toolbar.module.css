@@ -1,0 +1,54 @@
+.leiste {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.gruppe {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.ton[aria-pressed='false'] {
+  border-color: var(--warn);
+}
+
+.lautstaerke input {
+  width: 6.5rem;
+  accent-color: var(--accent);
+}
+
+.kurz {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .leiste {
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .leiste :global(.btn) {
+    font-size: 0.85rem;
+    padding: 0.35em 0.7em;
+    min-height: 2.5em;
+  }
+
+  .lang {
+    display: none;
+  }
+
+  .kurz {
+    display: inline;
+  }
+
+  .lautstaerke input {
+    width: 5rem;
+  }
+}
+

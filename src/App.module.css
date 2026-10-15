@@ -1,0 +1,107 @@
+.app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Kopfleiste bleibt beim Scrollen stehen; ihre Höhe steht in --kopf-hoehe (gesetzt in App.tsx). */
+.kopf {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.7rem 1.5rem;
+  padding: 0.9rem clamp(16px, 2vw, 32px);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.marke {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.titel {
+  font-size: 1.35rem;
+  letter-spacing: -0.01em;
+}
+
+.haupt {
+  flex: 1;
+  display: grid;
+  grid-template-columns: minmax(250px, 19rem) minmax(0, 1fr);
+  grid-template-areas: 'karten buehne';
+  align-items: start;
+  gap: clamp(16px, 1.6vw, 28px);
+  padding: clamp(16px, 1.6vw, 28px) clamp(16px, 2vw, 32px);
+}
+
+.haupt[data-karten='zu'] {
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+}
+
+.buehne {
+  grid-area: buehne;
+  position: sticky;
+  top: calc(var(--kopf-hoehe, 0px) + clamp(16px, 1.6vw, 28px));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: 0;
+  max-height: calc(100dvh - var(--kopf-hoehe, 0px) - 2 * clamp(16px, 1.6vw, 28px));
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.buehne > * {
+  flex-shrink: 0;
+}
+
+.karten {
+  grid-area: karten;
+  min-width: 0;
+}
+
+.fuss {
+  padding: 1rem clamp(16px, 2vw, 32px) 1.4rem;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  border-top: 1px solid var(--border);
+}
+
+/* Handy und schmale Fenster: Cockpit klebt oben, Karten darunter. */
+@media (max-width: 900px) {
+  .haupt {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'buehne'
+      'karten';
+    padding-top: 0;
+  }
+
+  .buehne {
+    top: var(--kopf-hoehe, 0px);
+    z-index: 10;
+    max-height: calc(68dvh - var(--kopf-hoehe, 0px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0 calc(-1 * clamp(16px, 2vw, 32px));
+    padding: 10px clamp(16px, 2vw, 32px);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 10px 20px rgb(0 0 0 / 40%);
+  }
+
+  .haupt[data-karten='zu'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .titel {
+    font-size: 1.2rem;
+  }
+}

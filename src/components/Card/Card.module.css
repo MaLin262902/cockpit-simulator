@@ -1,0 +1,172 @@
+.karte {
+  perspective: 1400px;
+}
+
+.dreher {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform var(--dur) var(--ease);
+}
+
+.karte[data-zustand='invertiert'] .dreher {
+  transform: rotateY(180deg);
+}
+
+.seite {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  padding: 0.7rem 0.8rem 0.65rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  transition:
+    border-color var(--dur-kurz) var(--ease),
+    background var(--dur-kurz) var(--ease);
+}
+
+/* Grün heißt immer „Vorgabe gilt“, Rot heißt „invertiert“. */
+.vorne,
+.hinten {
+  cursor: pointer;
+}
+
+.vorne {
+  border-left: 4px solid var(--korrekt);
+}
+
+.vorne:hover {
+  background: var(--surface-2);
+}
+
+.hinten {
+  transform: rotateY(180deg);
+  border-color: var(--inversion);
+  border-left-width: 4px;
+  background: linear-gradient(180deg, var(--inversion-bg), var(--surface) 70%);
+}
+
+.kopf {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 0.8rem;
+}
+
+.nummer {
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: var(--surface-3);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.status {
+  margin-left: auto;
+  padding: 0.15rem 0.55rem;
+  border-radius: 99px;
+  font-weight: 600;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.status[data-zustand='invertiert'] {
+  background: var(--inversion-strong);
+  color: #fff;
+}
+
+.status[data-zustand='korrekt'] {
+  background: var(--korrekt);
+  color: #06261a;
+}
+
+.titel {
+  font-size: 0.95rem;
+  line-height: 1.3;
+}
+
+.text {
+  color: var(--text-muted);
+  font-size: 0.84rem;
+}
+
+.marke {
+  font-weight: 700;
+}
+
+.hinten .marke {
+  color: var(--inversion);
+}
+
+.aktionen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.info summary {
+  cursor: pointer;
+  width: fit-content;
+  padding: 0.2rem 0;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.info dl {
+  margin: 0.5rem 0 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.info dt {
+  margin-top: 0.4rem;
+  color: var(--text);
+  font-weight: 700;
+}
+
+.info dd {
+  margin: 0;
+}
+
+.pruefen,
+.quelleHinweis {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.85em;
+  font-style: italic;
+}
+
+.pruefen {
+  color: var(--warn);
+}
+
+/* Reduzierte Bewegung: weiches Umblenden statt Drehen */
+@media (prefers-reduced-motion: reduce) {
+  .dreher,
+  .karte[data-zustand='invertiert'] .dreher,
+  .hinten {
+    transform: none;
+  }
+
+  .karte[data-zustand='invertiert'] .vorne,
+  .karte:not([data-zustand='invertiert']) .hinten {
+    visibility: hidden;
+  }
+}
+
+.aktionen :global(.btn) {
+  min-height: 2.2em;
+  padding: 0.3em 0.7em;
+  font-size: 0.8rem;
+}

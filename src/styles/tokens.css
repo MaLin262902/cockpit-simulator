@@ -1,0 +1,41 @@
+:root {
+  color-scheme: dark;
+
+  /* App-Oberfläche */
+  --bg: #0d1014;
+  --surface: #151a20;
+  --surface-2: #1c2229;
+  --surface-3: #242b34;
+  --border: #2d3540;
+  --text: #eef1f5;
+  --text-muted: #aeb8c4;
+  --accent: #82c4ff;
+  --accent-text: #0b1520;
+  --inversion: #ff8a80;
+  --inversion-bg: #3b1f22;
+  --inversion-strong: #e5534b;
+  --korrekt: #63dca0;
+  --korrekt-bg: #15342a;
+  --warn: #ffc65c;
+  --focus: #ffd866;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 10px 30px rgb(0 0 0 / 35%);
+
+  --font: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --dur: 420ms;
+  --dur-kurz: 220ms;
+  --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
+
+  /* Beamer: Grundschrift wächst mit der Breite, bleibt aber auf dem Handy gut lesbar. */
+  font-size: clamp(15px, 0.55vw + 9.5px, 20px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur: 0ms;
+    --dur-kurz: 0ms;
+  }
+}

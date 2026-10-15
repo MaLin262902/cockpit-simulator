@@ -1,0 +1,35 @@
+.strasse {
+  height: clamp(56px, 9vh, 104px);
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #1d242c;
+  background: #141e2a;
+}
+
+.strasse svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mittellinie {
+  animation: fahren 0.9s linear infinite;
+}
+
+@keyframes fahren {
+  to {
+    stroke-dashoffset: -28;
+  }
+}
+
+@media (max-width: 640px) {
+  .strasse {
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mittellinie {
+    animation: none;
+  }
+}
