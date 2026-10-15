@@ -601,20 +601,6 @@
   border-radius: 0.8cqi;
 }
 
-.tempoDezent {
-  display: flex;
-  align-items: center;
-  gap: 0.4em;
-  color: var(--ck-amber);
-  font-weight: 700;
-  font-size: max(var(--min), calc(1.5cqi * var(--s)));
-}
-
-.tempoDezent svg {
-  width: 1.2em;
-  height: 1.2em;
-}
-
 .tempoAus {
   color: var(--ck-muted);
   font-size: max(var(--min), calc(1.5cqi * var(--s)));

@@ -27,22 +27,18 @@ export function Card({ karte, nummer }: Props) {
     <article className={styles.karte} data-zustand={zustand} aria-labelledby={titelId}>
       <div className={styles.dreher}>
         <div className={`${styles.seite} ${styles.vorne}`} inert={invertiert} onClick={klickAufKarte}>
-          <Kopf nummer={nummer} zustand="korrekt" />
-          <h3 className={styles.titel} id={titelId}>
-            {karte.vorgabe}
-          </h3>
+          <Kopf nummer={nummer} zustand="korrekt" titel={karte.vorgabe} titelId={titelId} />
           <p className={styles.text}>{karte.regel}</p>
           <div className={styles.aktionen}>
             <button type="button" className="btn btn-inversion" onClick={() => umschalten(karte.id)}>
               Invertieren
             </button>
+            <Info karte={karte} />
           </div>
-          <Info karte={karte} />
         </div>
 
         <div className={`${styles.seite} ${styles.hinten}`} inert={!invertiert} onClick={klickAufKarte}>
-          <Kopf nummer={nummer} zustand="invertiert" />
-          <h3 className={styles.titel}>{karte.vorgabe}</h3>
+          <Kopf nummer={nummer} zustand="invertiert" titel={karte.vorgabe} />
           <p className={styles.text}>
             <strong className={styles.marke}>Invertiert:</strong> {karte.sabotage}
           </p>
@@ -50,8 +46,8 @@ export function Card({ karte, nummer }: Props) {
             <button type="button" className="btn btn-korrekt" onClick={() => umschalten(karte.id)}>
               Korrigieren
             </button>
+            <Info karte={karte} />
           </div>
-          <Info karte={karte} />
         </div>
       </div>
     </article>
@@ -63,12 +59,26 @@ const ZUSTAND_TEXT: Record<KartenZustand, string> = {
   invertiert: 'Invertiert',
 };
 
-function Kopf({ nummer, zustand }: { nummer: number; zustand: KartenZustand }) {
+/** Eine Zeile: Nummer, Titel, Status. */
+function Kopf({
+  nummer,
+  zustand,
+  titel,
+  titelId,
+}: {
+  nummer: number;
+  zustand: KartenZustand;
+  titel: string;
+  titelId?: string;
+}) {
   return (
     <div className={styles.kopf}>
       <span className={styles.nummer} aria-hidden="true">
         {nummer}
       </span>
+      <h3 className={styles.titel} id={titelId}>
+        {titel}
+      </h3>
       <span className={styles.status} data-zustand={zustand}>
         {ZUSTAND_TEXT[zustand]}
       </span>
@@ -79,10 +89,8 @@ function Kopf({ nummer, zustand }: { nummer: number; zustand: KartenZustand }) {
 function Info({ karte }: { karte: Karte }) {
   return (
     <details className={styles.info}>
-      <summary>Info zur Vorgabe</summary>
+      <summary>Info</summary>
       <dl>
-        <dt>Vorgabe</dt>
-        <dd>{karte.vorgabe}</dd>
         <dt>Quelle</dt>
         <dd>
           {karte.quelleUrl ? (

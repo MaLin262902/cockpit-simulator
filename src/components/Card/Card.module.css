@@ -2,8 +2,9 @@
   perspective: 1400px;
 }
 
+/* Die Höhe richtet sich nur nach der sichtbaren Seite; die verdeckte liegt absolut darüber. */
 .dreher {
-  display: grid;
+  position: relative;
   transform-style: preserve-3d;
   transition: transform var(--dur) var(--ease);
 }
@@ -13,11 +14,10 @@
 }
 
 .seite {
-  grid-area: 1 / 1;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
-  padding: 0.7rem 0.8rem 0.65rem;
+  gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
   border-radius: var(--radius);
   border: 1px solid var(--border);
   background: var(--surface);
@@ -38,6 +38,13 @@
   border-left: 4px solid var(--korrekt);
 }
 
+.karte[data-zustand='invertiert'] .vorne,
+.karte:not([data-zustand='invertiert']) .hinten {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
 .vorne:hover {
   background: var(--surface-2);
 }
@@ -52,15 +59,16 @@
 .kopf {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 0.8rem;
+  gap: 0.5rem;
+  font-size: 0.75rem;
 }
 
 .nummer {
+  flex: none;
   display: grid;
   place-items: center;
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.4rem;
+  height: 1.4rem;
   border-radius: 50%;
   background: var(--surface-3);
   font-weight: 700;
@@ -68,8 +76,9 @@
 }
 
 .status {
+  flex: none;
   margin-left: auto;
-  padding: 0.15rem 0.55rem;
+  padding: 0.1rem 0.5rem;
   border-radius: 99px;
   font-weight: 600;
   background: var(--surface-3);
@@ -87,8 +96,10 @@
 }
 
 .titel {
-  font-size: 0.95rem;
-  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+  font-size: 0.92rem;
+  line-height: 1.25;
 }
 
 .text {
@@ -104,10 +115,16 @@
   color: var(--inversion);
 }
 
+/* Knopf und Info in einer Zeile; geöffnete Info nimmt die volle Breite darunter ein */
 .aktionen {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.25rem 0.9rem;
+}
+
+.info[open] {
+  flex-basis: 100%;
 }
 
 .info {

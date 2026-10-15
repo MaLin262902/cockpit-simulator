@@ -139,8 +139,8 @@ async function laufFuerGeraet(browser, geraet, bericht) {
 
   // Gruppen sind anfangs eingeklappt: erste Gruppe öffnen, dann die Info der ersten Karte
   await page.locator('details > summary').first().evaluate((s) => s.click());
-  await page.locator('summary', { hasText: 'Info zur Vorgabe' }).first().click();
-  await page.locator('summary', { hasText: 'Info zur Vorgabe' }).first().scrollIntoViewIfNeeded();
+  await page.locator('summary', { hasText: 'Info' }).first().click();
+  await page.locator('summary', { hasText: 'Info' }).first().scrollIntoViewIfNeeded();
   await warte(300);
   await foto('08-info');
 

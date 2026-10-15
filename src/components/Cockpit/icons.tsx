@@ -78,13 +78,6 @@ export const Stumm = (p: P) => (
   </svg>
 );
 
-export const Vibration = (p: P) => (
-  <svg {...basis} {...p}>
-    <rect x="8" y="4" width="8" height="16" rx="2" />
-    <path d="M4.5 8v8M2 10v4M19.5 8v8M22 10v4" />
-  </svg>
-);
-
 export const Haken = (p: P) => (
   <svg {...basis} {...p}>
     <path d="m5 12.5 4.5 4.5L19 7.5" />

@@ -209,15 +209,6 @@ function Tempolimit({ modus, tempo, en }: { modus: Modus; tempo: number; en: boo
       {ueber && modus === 'invertiert' && (
         <div className={styles.tempoAlarm}>{en ? 'SPEED LIMIT EXCEEDED!' : 'TEMPOLIMIT ÜBERSCHRITTEN!'}</div>
       )}
-      {/* Korrekt: Nur wenn wirklich zu schnell gefahren wird, ein dezenter Hinweis mit Pedal-Impuls. */}
-      {ueber && modus === 'korrekt' && (
-        <div className={styles.tempoDezent}>
-          <I.Vibration />
-          <span>
-            +{tempo - tempolimit} km/h · {en ? 'pedal pulse' : 'Pedal-Impuls'}
-          </span>
-        </div>
-      )}
       {isaAus && <div className={styles.tempoAus}>{en ? 'ISA OFF' : 'Tempowarner aus'}</div>}
     </div>
   );
