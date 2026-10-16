@@ -117,7 +117,7 @@ async function laufFuerGeraet(browser, geraet, bericht) {
   await foto('05-vergleich');
   await invertiereKarte();
   await warte(600);
-  ergebnis.vergleichBearbeitbar = await page.getByText('3 von 12 invertiert').isVisible();
+  ergebnis.vergleichBearbeitbar = await page.getByText('3 von 11 invertiert').isVisible();
   ergebnis.ueberlauf.vergleich = await horizontalerUeberlauf(page);
   await leiste(page, 'Vergleich').click();
   await leiste(page, 'Alles invertieren').click();

@@ -25,7 +25,7 @@ Die Kopfleiste mit Ton, Vergleich und „Alles invertieren“ bleibt beim Scroll
 
 Viele Karten wirken auch im Hauptdisplay, zum Beispiel Werbung und Benachrichtigungen (Ablenkung), ein Auto statt der Geschwindigkeit im Tacho und keine echten Tasten mehr (Blickabwendung), psi, °F und Fehlermeldungen wie „Operation failed successfully“ (reale Welt), ein Reifendruck-Warnwert in Grün (Farblogik) oder „Autopilot auf gesamter Strecke“ statt der Strecke, auf der der Assistent tatsächlich verfügbar ist (Systemgrenzen).
 
-**Das korrekte Cockpit ist fehlerfrei.** Es zeigt keine Warnleuchte, keinen niedrigen Reifendruck, keine Fehlermeldung und keine Tempoüberschreitung, sonst widerlegt es sich selbst. Solche Störungen entstehen nur durch die jeweilige Inversion: Der invertierte Tempowarner lässt das Auto knapp zu schnell fahren und piept, die invertierte Farblogik zeigt einen Druckverlust in Grün.
+**Das korrekte Cockpit ist fehlerfrei.** Es zeigt keine Warnleuchte, keinen niedrigen Reifendruck, keine Fehlermeldung und keine Tempoüberschreitung, sonst widerlegt es sich selbst. Solche Störungen entstehen nur durch die jeweilige Inversion: Die invertierte Akustik piept ohne Pause, sobald das Auto schneller als erlaubt fährt, die invertierte Farblogik zeigt einen Druckverlust in Grün.
 
 **Jede Inversion hat ihren eigenen Ort** und verdeckt keine andere. So bleibt bei „Alles invertieren“ jede einzelne erkennbar, und das Cockpit wirkt wie ein schlecht gestaltetes, aber echtes Produkt statt wie Chaos.
 
@@ -75,22 +75,22 @@ Alle Inhalte stehen in **`src/data/cards.ts`**. Eine Karte sieht so aus:
 
 ```ts
 {
-  id: 'tempowarner',               // eindeutig, nur a–z, 0–9 und Bindestrich
+  id: 'neue-karte',                // eindeutig, nur a–z, 0–9 und Bindestrich
   kategorie: 'Assistenzsysteme', // Gruppe in der Kartenliste
-  vorgabe: 'Tempowarner nicht zur Nervenprobe machen',
-  quelle: 'EU-Verordnung 2019/2144 …',
+  vorgabe: 'Name der Gestaltungsvorgabe',
+  quelle: 'Fundstelle …',
   quelleUrl: '',                   // nur einen geprüften Link eintragen
   quelleStatus: 'prüfen',          // 'geprüft' oder 'prüfen'
   quelleHinweis: 'Angaben am Verordnungstext prüfen.', // optional
   regel: 'Die Regel in einem Satz.',
   sabotage: 'Was die Inversion im Cockpit bewirkt.',
   korrekt: 'Wie die korrekte Umsetzung aussieht.',
-  effekt: 'tempowarner',           // welcher Cockpit-Effekt ausgelöst wird
+  effekt: 'hinweis',               // welcher Cockpit-Effekt ausgelöst wird
 },
 ```
 
 - Bei `quelleStatus: 'prüfen'` zeigt die Info-Ansicht dezent „Quelle wird noch geprüft“. Sobald die Fundstelle bestätigt ist, auf `'geprüft'` setzen.
-- Bei drei Karten (2008/653/EG, 2019/2144) steht ein **vorgeschlagener EUR-Lex-Link als Kommentar** in der Datei. EUR-Lex ließ sich nicht automatisch abrufen, deshalb ist das Feld `quelleUrl` dort noch leer. Bitte im Browser prüfen und dann eintragen.
+- Stand: Alle Quellen sind geprüft (Oktober 2026). Die EU-Texte sind über ihre CELEX-Nummer auf EUR-Lex verlinkt. Bei ISO 15006 und DIN EN 894-3 ist der Normtext kostenpflichtig; geprüft sind dort Titel und Anwendungsbereich, das steht auch im Hinweis der jeweiligen Karte.
 - **Neue Karte:** Einfach unten im Array anhängen. Als `effekt` könnt ihr einen vorhandenen Effekt wiederverwenden:
 
   | `effekt` | Was im Cockpit passiert |
@@ -102,7 +102,6 @@ Alle Inhalte stehen in **`src/data/cards.ts`**. Eine Karte sieht so aus:
   | `ablenkung` | Laufschrift, Werbung, Mini-Anzeigen |
   | `blickabwendung` | Geschwindigkeit im Untermenü bzw. immer sichtbar |
   | `realeWelt` | Unverständliche Fehlermeldungen, mph, Akku in Volt, Englisch bzw. Klartext und Akku in % |
-  | `tempowarner` | Tempowarner |
   | `systemgrenzen` | „Autopilot 100 % sicher“ bzw. Systemgrenzen |
   | `gruppierung` | App-Leiste gemischt bzw. thematisch gruppiert |
   | `lesefluss` | Layout gespiegelt, Blinker übereinander und vertauscht bzw. F-Muster |

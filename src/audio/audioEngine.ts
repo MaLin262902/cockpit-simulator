@@ -160,14 +160,46 @@ function spieleTon({ frequenz, dauerMs, startMs = 0, form = 'sine', pegel = 1 }:
   osc.stop(t1 + 0.02);
 }
 
+/** Kurzes Rauschen, gefiltert: klingt wie das Klicken eines Relais. */
+let rauschen: AudioBuffer | null = null;
+function klick({ frequenz, pegel, startMs = 0 }: { frequenz: number; pegel: number; startMs?: number }) {
+  if (!aktiv || !ctx || !master) return;
+  if (!rauschen) {
+    rauschen = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.05), ctx.sampleRate);
+    const daten = rauschen.getChannelData(0);
+    for (let i = 0; i < daten.length; i++) daten[i] = Math.random() * 2 - 1;
+  }
+  const t0 = ctx.currentTime + startMs / 1000;
+  const quelle = ctx.createBufferSource();
+  quelle.buffer = rauschen;
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.value = frequenz;
+  filter.Q.value = 1.2;
+  const huelle = ctx.createGain();
+  huelle.gain.setValueAtTime(0, t0);
+  huelle.gain.linearRampToValueAtTime(pegel, t0 + 0.001);
+  huelle.gain.exponentialRampToValueAtTime(0.001, t0 + 0.03);
+  quelle.connect(filter).connect(huelle).connect(master);
+  quelle.start(t0);
+  quelle.stop(t0 + 0.05);
+}
+
 export const signale = {
   /** Kurzer, leiser Zweiklang als Bestätigung beim Einschalten. */
   bestaetigung: () => {
     spieleTon({ frequenz: 660, dauerMs: 120, pegel: 0.5 });
     spieleTon({ frequenz: 880, dauerMs: 160, startMs: 130, pegel: 0.5 });
   },
-  /** Blinker: leises Klicken, abwechselnd „tick“ und „tack“. */
-  blinkerTick: (hell: boolean) => spieleTon({ frequenz: hell ? 1900 : 1400, dauerMs: 14, form: 'square', pegel: 0.35 }),
-  /** Inversion Tempowarner: aufdringlicher Piepton bei jeder Überschreitung. */
-  einheitsPiep: () => spieleTon({ frequenz: 1000, dauerMs: 110, form: 'square', pegel: 0.55 }),
+  /** Blinker korrekt: Relais-Klicken, hell „tick“ beim Aufleuchten, tiefer „tack“ beim Erlöschen. */
+  blinkerKlick: (hell: boolean) => klick(hell ? { frequenz: 3200, pegel: 1 } : { frequenz: 1700, pegel: 0.7 }),
+  /** Blinker invertiert: Türklingel „Ding-Dong“ statt Klicken. */
+  tuerklingel: () => {
+    spieleTon({ frequenz: 784, dauerMs: 260, pegel: 0.45 });
+    spieleTon({ frequenz: 622, dauerMs: 380, startMs: 280, pegel: 0.45 });
+  },
+  /** Tempolimit überschritten, korrekt: ein einzelner, kurzer Hinweiston. */
+  tempoHinweis: () => spieleTon({ frequenz: 1250, dauerMs: 140, pegel: 0.5 }),
+  /** Tempolimit überschritten, invertiert: aufdringlicher Piepton ohne Pause. */
+  dauerPiep: () => spieleTon({ frequenz: 1000, dauerMs: 120, form: 'square', pegel: 0.55 }),
 };

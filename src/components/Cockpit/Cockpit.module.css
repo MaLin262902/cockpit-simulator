@@ -117,6 +117,12 @@
   margin: -6% 0 0;
 }
 
+/* Markenzeichen auf der Prallplatte, dezent eingeprägt */
+.lenkradMarke {
+  stroke: #59616c;
+  stroke-width: 3;
+}
+
 .lenkrad {
   display: block;
   width: 100%;
@@ -338,20 +344,17 @@
   font-weight: 600;
 }
 
-/* Inversion Blickabwendung: Auto von hinten statt Geschwindigkeit */
-.rundAuto {
-  fill: #2a3038;
+/* Inversion Blickabwendung: Markenlogo statt Geschwindigkeit */
+.rundMarke {
   stroke: var(--ck-muted);
-  stroke-width: 1.5;
+  stroke-width: 2.5;
 }
 
-.rundAutoDach {
-  fill: #121820;
-}
-
-.rundAutoLicht {
-  fill: #ff5a4e;
-  stroke: none;
+.rundMarkeName {
+  fill: var(--ck-muted);
+  font-size: calc(13px * var(--skala));
+  font-weight: 700;
+  letter-spacing: 0.3em;
 }
 
 /* Mitte: Tempolimit und Fahrerassistenz-Ansicht */
@@ -527,7 +530,7 @@
   }
 }
 
-/* Tempowarner */
+/* Tempolimit */
 
 .tempolimit {
   display: flex;
@@ -554,16 +557,6 @@
 
 .schild[data-ueber='true'] {
   box-shadow: 0 0 0 max(3px, 0.6cqi) var(--ck-amber);
-}
-
-.tempoAlarm {
-  background: var(--ck-amber);
-  color: #1d1400;
-  font-family: var(--font);
-  font-weight: 800;
-  font-size: max(var(--min), calc(1.7cqi * var(--s)));
-  padding: 0.3em 0.55em;
-  border-radius: 0.8cqi;
 }
 
 .tempoAus {
@@ -1562,11 +1555,6 @@
 .klimaleiste[data-direkt='true'] .app[aria-pressed='true'] {
   background: rgb(132 191 255 / 16%);
   border-color: var(--ck-blue);
-}
-
-.isaKnopf[aria-pressed='true'] {
-  color: var(--ck-green);
-  border-color: var(--ck-green) !important;
 }
 
 .menueSymbol {

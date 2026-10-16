@@ -25,7 +25,6 @@ export function Zentraldisplay({ m, lage }: Props) {
   const [ansicht, setAnsicht] = useState<Ansicht>('navi');
   const [menueOffen, setMenueOffen] = useState(false);
   const [temp, setTemp] = useState<Temperaturen>({ links: 21, rechts: 21.5 });
-  const mitMenue = m.blickabwendung === 'invertiert' || m.tempowarner === 'invertiert';
   const reduziert = m.ablenkung === 'korrekt';
   const audio = useAudio();
   const { rest } = useSim();
@@ -59,23 +58,23 @@ export function Zentraldisplay({ m, lage }: Props) {
           </Kachel>
           <div className={styles.seite}>
             {ansicht !== 'medien' && (
-              <Kachel name="Medien">
+              <Kachel name="Medien" start={[0.36, 0.1]}>
                 <Medien kompakt={reduziert} en={en} />
               </Kachel>
             )}
             {ansicht !== 'fahrzeug' && (
-              <Kachel name="Reifendruck">
+              <Kachel name="Reifendruck" start={[0.28, -0.16]}>
                 <Fahrzeugstatus modus={m.farblogik} en={en} />
               </Kachel>
             )}
             {m.ablenkung === 'invertiert' && (
-              <Kachel name="Werbung">
+              <Kachel name="Werbung" start={[0.18, -0.3]}>
                 <Werbung en={en} />
               </Kachel>
             )}
             {reduziert && <p className={styles.standHinweis}>Weitere Inhalte im Stand</p>}
           </div>
-          {mitMenue && menueOffen && (
+          {menueOffen && (
             <Menue
               m={m}
               tempo={lage.tempo}
@@ -96,7 +95,6 @@ export function Zentraldisplay({ m, lage }: Props) {
           setTemp={setTemp}
           ansicht={ansicht}
           setAnsicht={setAnsicht}
-          mitMenue={mitMenue}
           menueOffen={menueOffen}
           setMenueOffen={setMenueOffen}
         />
@@ -639,7 +637,6 @@ function Klimaleiste({
   setTemp,
   ansicht,
   setAnsicht,
-  mitMenue,
   menueOffen,
   setMenueOffen,
 }: {
@@ -649,7 +646,6 @@ function Klimaleiste({
   setTemp: (t: Temperaturen) => void;
   ansicht: Ansicht;
   setAnsicht: (a: Ansicht) => void;
-  mitMenue: boolean;
   menueOffen: boolean;
   setMenueOffen: (offen: boolean) => void;
 }) {
@@ -684,14 +680,12 @@ function Klimaleiste({
     </button>
   );
 
-  const isa = m.tempowarner === 'korrekt';
   let dock: ReactNode;
   if (m.gruppierung === 'invertiert') {
     const gemischt = [apps[3], fremde[0], apps[0], fremde[1], apps[1], fremde[2], apps[2], apps[4]];
     dock = (
       <>
         {gemischt.map((a, i) => knopf(a, { marginLeft: abstaende[i] }))}
-        {isa && <IsaSchalter />}
       </>
     );
   } else {
@@ -709,7 +703,6 @@ function Klimaleiste({
     dock = (
       <>
         {gruppen.map((g) => gruppe(g.id, g.titel, apps.filter((a) => a.gruppe === g.id).map((a) => knopf(a))))}
-        {isa && gruppe('assistenz', en ? 'ISA' : 'Tempowarner', <IsaSchalter kurz />)}
       </>
     );
   }
@@ -723,38 +716,18 @@ function Klimaleiste({
       <Klimaregler seite="links" m={m} en={en} temp={temp} setTemp={setTemp} />
       <div className={styles.dock} role="group" aria-label="App-Leiste" data-gruppierung={m.gruppierung}>
         {dock}
-        {mitMenue && (
-          <button
-            type="button"
-            className={styles.app}
-            aria-expanded={menueOffen}
-            onClick={() => setMenueOffen(!menueOffen)}
-          >
-            <span className={styles.menueSymbol}>☰</span>
-            <span>{en ? 'Menu' : 'Menü'}</span>
-          </button>
-        )}
+        <button
+          type="button"
+          className={styles.app}
+          aria-expanded={menueOffen}
+          onClick={() => setMenueOffen(!menueOffen)}
+        >
+          <span className={styles.menueSymbol}>☰</span>
+          <span>{en ? 'Menu' : 'Menü'}</span>
+        </button>
       </div>
       <Klimaregler seite="rechts" m={m} en={en} temp={temp} setTemp={setTemp} />
     </div>
-  );
-}
-
-/** Schnellschalter für den Tempowarner. `kurz`: in der Gruppe „Tempowarner“ reicht „an“/„aus“. */
-function IsaSchalter({ kurz = false }: { kurz?: boolean }) {
-  const { isaAus, setIsaAus } = useSim();
-  const zustand = isaAus ? 'aus' : 'an';
-  return (
-    <button
-      type="button"
-      className={`${styles.app} ${styles.isaKnopf}`}
-      aria-pressed={!isaAus}
-      title="Beim nächsten Start automatisch wieder an"
-      onClick={() => setIsaAus(!isaAus)}
-    >
-      <I.Tempomat />
-      <span>{kurz ? zustand : `Tempowarner ${zustand}`}</span>
-    </button>
   );
 }
 
@@ -768,8 +741,8 @@ const AMBIENTE = ['Abendrot', 'Polarlicht', 'Neon-Pink', 'Büro-Weiß', 'Aquariu
 const MASSAGE = ['Welle', 'Katze', 'Presslufthammer', 'Sanfter Tsunami', 'Aus'];
 
 /**
- * Invertierte Bedienwege: ein tief verschachteltes, unsinnig sortiertes Menü.
- * Alle Einträge funktionieren tatsächlich, nur findet man sie nicht.
+ * Menü im Hauptdisplay. Korrekt flach und aufgabenorientiert; invertiert (Karte „Blickabwendung“) tief verschachtelt
+ * und unsinnig sortiert. Alle Einträge funktionieren tatsächlich, invertiert findet man sie nur nicht.
  */
 function Menue({
   m,
@@ -800,7 +773,76 @@ function Menue({
     </button>
   );
 
-  const baum: Knoten[] = [
+  // Korrekt: flach und nach Aufgaben sortiert, jede Einstellung nach zwei Schritten erreichbar.
+  const flach: Knoten[] = [
+    {
+      label: 'Klima',
+      kinder: [
+        {
+          label: 'Temperatur Fahrer',
+          inhalt: (
+            <span className={styles.menueReihe}>
+              <button type="button" className={styles.menuePunkt} onClick={() => setTemp({ ...temp, links: Math.max(16, temp.links - 0.5) })}>
+                −
+              </button>
+              <span className={styles.menueTempo}>{tempText(temp.links, en)}</span>
+              <button type="button" className={styles.menuePunkt} onClick={() => setTemp({ ...temp, links: Math.min(28, temp.links + 0.5) })}>
+                +
+              </button>
+            </span>
+          ),
+        },
+      ],
+    },
+    {
+      label: 'Fahrerassistenz',
+      kinder: [
+        { label: 'Tempowarner', inhalt: schalter('Tempowarner', !isaAus, () => setIsaAus(!isaAus)) },
+        { label: 'Spurhalteassistent', inhalt: 'Spurhalteassistent: an' },
+      ],
+    },
+    {
+      label: 'Licht',
+      kinder: [
+        {
+          label: 'Ambientelicht',
+          inhalt: (
+            <button type="button" className={styles.menuePunkt} onClick={() => setAmbiente((ambiente + 1) % AMBIENTE.length)}>
+              Farbe: {AMBIENTE[ambiente]} ›
+            </button>
+          ),
+        },
+      ],
+    },
+    {
+      label: 'Sitz',
+      kinder: [
+        {
+          label: 'Massage',
+          inhalt: (
+            <button type="button" className={styles.menuePunkt} onClick={() => setMassage((massage + 1) % MASSAGE.length)}>
+              Programm: {MASSAGE[massage]} ›
+            </button>
+          ),
+        },
+      ],
+    },
+    {
+      label: 'Sprache',
+      inhalt: (
+        <span className={styles.menueReihe}>
+          {['Deutsch', 'English'].map((s) => (
+            <button key={s} type="button" className={styles.menuePunkt} aria-pressed={sprache === s} onClick={() => setSprache(s)}>
+              {s}
+            </button>
+          ))}
+        </span>
+      ),
+    },
+  ];
+
+  // Invertiert (Blickabwendung): tief verschachtelt und unsinnig sortiert, das Tempo steckt im Untermenü.
+  const tief: Knoten[] = [
     {
       label: 'Favoriten',
       inhalt: 'Keine Favoriten. Favoriten anlegen unter: Einstellungen › Favoriten › Favoriten verwalten › Favorit hinzufügen.',
@@ -920,9 +962,7 @@ function Menue({
                     {
                       label: 'Fahrerassistenz',
                       kinder: [
-                        ...(m.tempowarner === 'invertiert'
-                          ? [{ label: 'Tempowarner', inhalt: schalter('Tempowarner', !isaAus, () => setIsaAus(!isaAus)) }]
-                          : []),
+                        { label: 'Tempowarner', inhalt: schalter('Tempowarner', !isaAus, () => setIsaAus(!isaAus)) },
                         { label: 'Spurhalten', inhalt: 'Spurhalten: Standard (nicht änderbar)' },
                       ],
                     },
@@ -955,6 +995,8 @@ function Menue({
       kinder: [{ label: 'Hilfe', kinder: [{ label: 'Hilfe zur Hilfe', inhalt: 'Hilfe finden Sie unter: Menü › Hilfe.' }] }],
     },
   ];
+
+  const baum = blick ? tief : flach;
 
   // Pfad auflösen; fällt ein Eintrag weg, springt das Menü zurück.
   let ebene: Knoten[] = baum;

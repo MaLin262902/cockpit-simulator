@@ -10,7 +10,6 @@ export const EFFEKTE = {
   ablenkung: { bereich: 'Menge der Informationen' },
   blickabwendung: { bereich: 'Geschwindigkeit und Bedienwege' },
   realeWelt: { bereich: 'Sprache, Einheiten und Meldungen' },
-  tempowarner: { bereich: 'Tempowarner' },
   systemgrenzen: { bereich: 'Anzeige der Systemgrenzen' },
   gruppierung: { bereich: 'Gruppierung der App-Leiste' },
   lesefluss: { bereich: 'Anordnung und Lesefluss' },

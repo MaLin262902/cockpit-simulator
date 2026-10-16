@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -53,15 +54,44 @@ const INTERAKTIV = 'button, input, select, a, label, [role="slider"]';
 /**
  * Verschiebbare Kachel im Hauptdisplay. Maus: überall ziehen (außer auf Bedienelementen).
  * Touch: nur am Griff oben rechts, damit das Wischen zum Scrollen weiter funktioniert.
- * Anklicken holt die Kachel nach vorn, Doppelklick setzt sie an ihren Platz zurück.
+ * Anklicken holt die Kachel nach vorn. `start`: Versatz in Anteilen der Displaybreite und -höhe, mit dem die Kachel
+ * in der Inversion beginnt; so überlappen die Kacheln und müssen erst auseinandergezogen werden.
  */
-export function Kachel({ className, children, name }: { className?: string; children: ReactNode; name: string }) {
+export function Kachel({
+  className,
+  children,
+  name,
+  start,
+}: {
+  className?: string;
+  children: ReactNode;
+  name: string;
+  start?: [number, number];
+}) {
   const { beweglich, nachVorne } = useContext(Ebenen);
   const element = useRef<HTMLDivElement>(null);
   const zug = useRef<Zug | null>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [ebene, setEbene] = useState(0);
   const [zieht, setZieht] = useState(false);
+
+  // Beim Einschalten der Inversion auf den Startversatz springen (im Display gehalten), beim Ausschalten zurück.
+  useLayoutEffect(() => {
+    const el = element.current;
+    if (!beweglich || !start || !el) {
+      setPos({ x: 0, y: 0 });
+      return;
+    }
+    const flaeche = el.closest('[data-kachelflaeche]')?.getBoundingClientRect();
+    if (!flaeche) return;
+    const r = el.getBoundingClientRect();
+    const begrenzt = (wert: number, min: number, max: number) => Math.min(max, Math.max(min, wert));
+    setPos({
+      x: begrenzt(start[0] * flaeche.width, flaeche.left - r.left, flaeche.right - r.right),
+      y: begrenzt(start[1] * flaeche.height, flaeche.top - r.top, flaeche.bottom - r.bottom),
+    });
+    // Nur beim Umschalten der Inversion, nicht bei jeder Verschiebung.
+  }, [beweglich]);
 
   const runter = (e: PointerEvent<HTMLDivElement>) => {
     setEbene(nachVorne());
@@ -127,9 +157,6 @@ export function Kachel({ className, children, name }: { className?: string; chil
       onPointerMove={bewegen}
       onPointerUp={loslassen}
       onPointerCancel={loslassen}
-      onDoubleClick={(e) => {
-        if (!(e.target as HTMLElement).closest(INTERAKTIV)) setPos({ x: 0, y: 0 });
-      }}
     >
       {children}
       <span className={styles.griff} data-griff="" title={`${name} verschieben`} aria-hidden="true" />

@@ -6,6 +6,7 @@ import styles from './Cockpit.module.css';
 import * as I from './icons';
 import { Fahrerbedienung, Lenkstockschalter } from './Fahrerbedienung';
 import { Kombiinstrument } from './Kombiinstrument';
+import { MarkenZeichen } from './Marke';
 import { Zentraldisplay } from './Zentraldisplay';
 
 /** Aktuelle Fahrsituation. */
@@ -200,7 +201,7 @@ function Lenkrad() {
       <circle cx="694" cy="372" r="11" fill="#2c3138" />
       <circle cx="730" cy="372" r="11" fill="#2c3138" />
       <rect x="390" y="300" width="220" height="110" rx="46" fill="url(#lenkrad-nabe)" stroke="#2c3138" strokeWidth="2" />
-      <circle cx="500" cy="352" r="16" fill="none" stroke="#3a4048" strokeWidth="3" />
+      <MarkenZeichen cx={500} cy={350} r={24} className={styles.lenkradMarke} />
     </svg>
   );
 }

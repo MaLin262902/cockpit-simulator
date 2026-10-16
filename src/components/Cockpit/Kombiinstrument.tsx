@@ -7,6 +7,7 @@ import { AdasAnsicht } from './AdasAnsicht';
 import type { Fahrlage } from './Cockpit';
 import styles from './Cockpit.module.css';
 import * as I from './icons';
+import { MARKE, MarkenZeichen } from './Marke';
 import { Rundinstrument } from './Rundinstrument';
 
 interface Props {
@@ -51,7 +52,7 @@ export function Kombiinstrument({ m, lage }: Props) {
                 <BlinkerPfeil seite="rechts" an={blinktLinks} />
               </span>
             )}
-            <Tempolimit modus={m.tempowarner} tempo={lage.tempo} en={en} />
+            <Tempolimit en={en} />
             {m.systemgrenzen === 'invertiert' && (
               // Übervertrauen: groß „100 % sicher“, die Einschränkung nur als Kleingedrucktes mit Sternchen.
               <div className={`${styles.grenzenSabotage} ${styles.blende}`}>
@@ -173,8 +174,8 @@ function Tacho({ m, tempo, en }: { m: CockpitModel; tempo: number; en: boolean }
       max={en ? 150 : 240}
       schritt={en ? 30 : 40}
       digital={String(wert)}
-      // Inversion Blickabwendung: Statt der Zahl ein hübsches Auto, das Tempo steht im Menü.
-      symbol={versteckt ? <AutoVonHinten /> : undefined}
+      // Inversion Blickabwendung: Statt der Zahl das Markenlogo, das Tempo steht im Menü.
+      symbol={versteckt ? <MarkeImTacho /> : undefined}
       einheit={versteckt ? '' : en ? 'mph' : 'km/h'}
       zusatz={versteckt ? (en ? 'SPD: see menu' : 'Tempo: siehe Menü') : undefined}
       beschriftung={versteckt ? 'Tacho ohne Geschwindigkeit' : `Tacho: ${wert} ${en ? 'mph' : 'km/h'}`}
@@ -183,30 +184,26 @@ function Tacho({ m, tempo, en }: { m: CockpitModel; tempo: number; en: boolean }
 }
 
 /** Eigenes Fahrzeug von hinten, ersetzt im invertierten Tacho die Geschwindigkeit. */
-function AutoVonHinten() {
+/** Markenlogo mit Schriftzug, um den Mittelpunkt 100/100 des Rundinstruments. */
+function MarkeImTacho() {
   return (
-    <g className={styles.rundAuto} transform="translate(100 100)">
-      <path className={styles.rundAutoDach} d="M-21 -6 L-15 -21 Q-13 -25 -8 -25 H8 Q13 -25 15 -21 L21 -6 Z" />
-      <rect x="-31" y="-7" width="62" height="21" rx="6" />
-      <rect className={styles.rundAutoLicht} x="-27" y="-1" width="11" height="5" rx="2" />
-      <rect className={styles.rundAutoLicht} x="16" y="-1" width="11" height="5" rx="2" />
-      <rect x="-27" y="13" width="9" height="8" rx="2" />
-      <rect x="18" y="13" width="9" height="8" rx="2" />
+    <g>
+      <MarkenZeichen cx={100} cy={80} r={20} className={styles.rundMarke} />
+      <text className={styles.rundMarkeName} x={100} y={118} textAnchor="middle">
+        {MARKE}
+      </text>
     </g>
   );
 }
 
-function Tempolimit({ modus, tempo, en }: { modus: Modus; tempo: number; en: boolean }) {
+/** Tempolimit-Schild. Die Warnung beim Überschreiten ist ein Ton (Karte „Akustische Informationsdarstellung“). */
+function Tempolimit({ en }: { en: boolean }) {
   const { tempolimit, isaAus } = useSim();
-  const ueber = tempo > tempolimit && !isaAus;
   return (
     <div className={styles.tempolimit}>
       <div className={styles.schild} role="img" aria-label={`Tempolimit ${tempolimit} km/h`}>
         {tempolimit}
       </div>
-      {ueber && modus === 'invertiert' && (
-        <div className={styles.tempoAlarm}>{en ? 'SPEED LIMIT EXCEEDED!' : 'TEMPOLIMIT ÜBERSCHRITTEN!'}</div>
-      )}
       {isaAus && <div className={styles.tempoAus}>{en ? 'ISA OFF' : 'Tempowarner aus'}</div>}
     </div>
   );
