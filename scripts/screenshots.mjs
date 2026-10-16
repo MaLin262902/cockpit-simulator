@@ -123,7 +123,7 @@ async function laufFuerGeraet(browser, geraet, bericht) {
   await leiste(page, 'Alles invertieren').click();
   await warte(300);
 
-  // Menü im invertierten Cockpit (Blickabwendung und Tempowarner stecken im Menü)
+  // Menü im invertierten Cockpit (tief verschachtelt; das Tempo steckt darin)
   await page.locator('[data-testid="cockpit"]').getByRole('button', { name: /Menu|Menü/ }).first().click();
   await page.locator('[data-testid="cockpit"]').scrollIntoViewIfNeeded();
   await warte(300);

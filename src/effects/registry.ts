@@ -3,12 +3,12 @@
  * Mehrere Karten dürfen denselben Effekt nutzen; dann gilt der schlechteste Zustand.
  */
 export const EFFEKTE = {
-  systemstatus: { bereich: 'Statusanzeige des Fahrassistenten' },
+  systemstatus: { bereich: 'Geschwindigkeit im Tacho und Status des Fahrassistenten' },
   farblogik: { bereich: 'Kontrollleuchten und Warnfarben' },
   kontrast: { bereich: 'Lesbarkeit von Tacho, Statusleiste und Navi-Hinweis' },
   akustik: { bereich: 'Navi-Ansagen und Warntöne' },
   ablenkung: { bereich: 'Menge der Informationen' },
-  blickabwendung: { bereich: 'Geschwindigkeit und Bedienwege' },
+  blickabwendung: { bereich: 'Tasten und Bedienwege' },
   realeWelt: { bereich: 'Sprache, Einheiten und Meldungen' },
   systemgrenzen: { bereich: 'Anzeige der Systemgrenzen' },
   gruppierung: { bereich: 'Gruppierung der App-Leiste' },

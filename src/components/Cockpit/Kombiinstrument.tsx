@@ -166,7 +166,8 @@ function AkustikHinweis({ modus }: { modus: Modus }) {
 }
 
 function Tacho({ m, tempo, en }: { m: CockpitModel; tempo: number; en: boolean }) {
-  const versteckt = m.blickabwendung === 'invertiert';
+  // Inversion „Sichtbarkeit des Systemstatus“: Statt der Geschwindigkeit das Markenlogo, das Tempo steht im Menü.
+  const versteckt = m.systemstatus === 'invertiert';
   const wert = en ? Math.round(tempo * 0.621) : tempo;
   return (
     <Rundinstrument
@@ -174,7 +175,6 @@ function Tacho({ m, tempo, en }: { m: CockpitModel; tempo: number; en: boolean }
       max={en ? 150 : 240}
       schritt={en ? 30 : 40}
       digital={String(wert)}
-      // Inversion Blickabwendung: Statt der Zahl das Markenlogo, das Tempo steht im Menü.
       symbol={versteckt ? <MarkeImTacho /> : undefined}
       einheit={versteckt ? '' : en ? 'mph' : 'km/h'}
       zusatz={versteckt ? (en ? 'SPD: see menu' : 'Tempo: siehe Menü') : undefined}

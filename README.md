@@ -23,7 +23,7 @@ Die Kopfleiste mit Ton, Vergleich und „Alles invertieren“ bleibt beim Scroll
 
 **Vergleich:** Links steht der aktuelle Stand, rechts das vollständig korrekte Cockpit. Die Karten bleiben dabei bedienbar, der linke Stand ändert sich mit.
 
-Viele Karten wirken auch im Hauptdisplay, zum Beispiel Werbung und Benachrichtigungen (Ablenkung), ein Auto statt der Geschwindigkeit im Tacho und keine echten Tasten mehr (Blickabwendung), psi, °F und Fehlermeldungen wie „Operation failed successfully“ (reale Welt), ein Reifendruck-Warnwert in Grün (Farblogik) oder „Autopilot auf gesamter Strecke“ statt der Strecke, auf der der Assistent tatsächlich verfügbar ist (Systemgrenzen).
+Viele Karten wirken auch im Hauptdisplay, zum Beispiel Werbung und Benachrichtigungen (Ablenkung), das Markenlogo statt der Geschwindigkeit im Tacho (Sichtbarkeit des Systemstatus), keine echten Tasten mehr (Blickabwendung), psi, °F und Fehlermeldungen wie „Operation failed successfully“ (reale Welt), ein Reifendruck-Warnwert in Grün (Farblogik) oder „Autopilot auf gesamter Strecke“ statt der Strecke, auf der der Assistent tatsächlich verfügbar ist (Systemgrenzen).
 
 **Das korrekte Cockpit ist fehlerfrei.** Es zeigt keine Warnleuchte, keinen niedrigen Reifendruck, keine Fehlermeldung und keine Tempoüberschreitung, sonst widerlegt es sich selbst. Solche Störungen entstehen nur durch die jeweilige Inversion: Die invertierte Akustik piept ohne Pause, sobald das Auto schneller als erlaubt fährt, die invertierte Farblogik zeigt einen Druckverlust in Grün.
 
@@ -96,12 +96,12 @@ Alle Inhalte stehen in **`src/data/cards.ts`**. Eine Karte sieht so aus:
 
   | `effekt` | Was im Cockpit passiert |
   |---|---|
-  | `systemstatus` | Statusanzeige des Spurhalteassistenten |
+  | `systemstatus` | Tacho zeigt nur das Markenlogo (Tempo im Menü), kein Status des Spurhalteassistenten bzw. Tempo groß und Kontrollleuchte |
   | `farblogik` | Kontrollleuchten: Symbole und Farben |
   | `kontrast` | Dunkelgrau auf Schwarz bei Tacho, Leistungsanzeige, Statusleiste, Abbiegehinweis und Ankunftszeit |
   | `akustik` | Navi-Ansage ohne Inhalt („Weiter vorne abbiegen.“) bzw. mit Entfernung, Richtung und Straße |
   | `ablenkung` | Laufschrift, Werbung, Mini-Anzeigen |
-  | `blickabwendung` | Geschwindigkeit im Untermenü bzw. immer sichtbar |
+  | `blickabwendung` | Nur Klavierlack und tief verschachteltes Menü bzw. echte Tasten und flaches Menü |
   | `realeWelt` | Unverständliche Fehlermeldungen, mph, Akku in Volt, Englisch bzw. Klartext und Akku in % |
   | `systemgrenzen` | „Autopilot 100 % sicher“ bzw. Systemgrenzen |
   | `gruppierung` | App-Leiste gemischt bzw. thematisch gruppiert |

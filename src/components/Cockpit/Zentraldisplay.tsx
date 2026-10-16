@@ -768,6 +768,12 @@ function Menue({
   const [sender, setSender] = useState('101,3');
   const [sprache, setSprache] = useState('Deutsch');
   const blick = m.blickabwendung === 'invertiert';
+  const tempoImMenue = m.systemstatus === 'invertiert';
+  const tempoAnzeige = (
+    <span className={styles.menueTempo}>
+      {en ? Math.round(tempo * 0.621) : tempo} {en ? 'mph' : 'km/h'}
+    </span>
+  );
 
   const schalter = (text: string, an: boolean, umschalten: () => void) => (
     <button type="button" className={styles.menuePunkt} aria-pressed={an} onClick={umschalten}>
@@ -777,6 +783,7 @@ function Menue({
 
   // Korrekt: flach und nach Aufgaben sortiert, jede Einstellung nach zwei Schritten erreichbar.
   const flach: Knoten[] = [
+    ...(tempoImMenue ? [{ label: 'Anzeigen', kinder: [{ label: 'Geschwindigkeit', inhalt: tempoAnzeige }] }] : []),
     {
       label: 'Klima',
       kinder: [
@@ -843,7 +850,7 @@ function Menue({
     },
   ];
 
-  // Invertiert (Blickabwendung): tief verschachtelt und unsinnig sortiert, das Tempo steckt im Untermenü.
+  // Invertiert (Blickabwendung): tief verschachtelt und unsinnig sortiert; ist der Tacho leer, steckt das Tempo tief drin.
   const tief: Knoten[] = [
     {
       label: 'Favoriten',
@@ -925,25 +932,11 @@ function Menue({
             },
           ],
         },
-        ...(blick
+        ...(tempoImMenue
           ? [
               {
                 label: 'Anzeigen',
-                kinder: [
-                  {
-                    label: 'Tacho',
-                    kinder: [
-                      {
-                        label: 'Geschwindigkeit anzeigen',
-                        inhalt: (
-                          <span className={styles.menueTempo}>
-                            {en ? Math.round(tempo * 0.621) : tempo} {en ? 'mph' : 'km/h'}
-                          </span>
-                        ),
-                      },
-                    ],
-                  },
-                ],
+                kinder: [{ label: 'Tacho', kinder: [{ label: 'Geschwindigkeit anzeigen', inhalt: tempoAnzeige }] }],
               },
             ]
           : []),

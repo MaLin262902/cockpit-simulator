@@ -71,8 +71,8 @@ export const cards: Karte[] = [
     quelleStatus: 'geprüft',
     quelleHinweis: 'Werte gelten für die Normalsituation; unter erschwerten Bedingungen bis zu 1,5 s länger.',
     regel: 'Fahrrelevante Informationen sind mit einem kurzen Blick erfassbar, ohne lange Bedienwege.',
-    sabotage: 'Geschwindigkeit nur in einem Untermenü, keine echten Tasten, Bedienung über verschachtelte Touch-Menüs.',
-    korrekt: 'Wichtige Infos immer im Blickfeld, häufige Funktionen direkt erreichbar.',
+    sabotage: 'Keine echten Tasten, nur Klavierlack; Bedienung über tief verschachtelte, unsinnig sortierte Touch-Menüs.',
+    korrekt: 'Häufige Funktionen direkt erreichbar: echte, beschriftete Tasten und ein flaches Menü.',
     effekt: 'blickabwendung',
   },
   {
@@ -133,9 +133,9 @@ export const cards: Karte[] = [
     quelle: 'Nielsen, 10 Usability-Heuristiken: „Visibility of System Status“',
     quelleUrl: 'https://www.nngroup.com/articles/ten-usability-heuristics/',
     quelleStatus: 'geprüft',
-    regel: 'Das Fahrzeug zeigt jederzeit eindeutig, ob ein Assistenzsystem gerade aktiv ist oder nicht.',
-    sabotage: 'Ob der Fahrassistent aktiv ist, wird nirgends angezeigt.',
-    korrekt: 'Eindeutiges Statussymbol, der Wechsel zwischen aktiv und inaktiv ist deutlich sichtbar.',
+    regel: 'Das Fahrzeug zeigt jederzeit eindeutig seinen Zustand: wie schnell es fährt und ob ein Assistenzsystem gerade aktiv ist.',
+    sabotage: 'Im Tacho steht statt der Geschwindigkeit nur das Markenlogo, das Tempo steckt im Menü. Ob der Spurhalteassistent aktiv ist, wird nirgends angezeigt.',
+    korrekt: 'Geschwindigkeit immer groß im Tacho; Spurhalteassistent als Kontrollleuchte, grün = aktiv, grau = bereit.',
     effekt: 'systemstatus',
   },
   {
