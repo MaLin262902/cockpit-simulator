@@ -31,22 +31,13 @@
   letter-spacing: -0.01em;
 }
 
+/* Das Cockpit bekommt die volle Breite; die Karten liegen in der Menü-Blase darüber. */
 .haupt {
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(250px, 19rem) minmax(0, 1fr);
-  grid-template-areas: 'karten buehne';
-  align-items: start;
-  gap: clamp(16px, 1.6vw, 28px);
   padding: clamp(16px, 1.6vw, 28px) clamp(16px, 2vw, 32px);
 }
 
-.haupt[data-karten='zu'] {
-  grid-template-columns: 2.6rem minmax(0, 1fr);
-}
-
 .buehne {
-  grid-area: buehne;
   position: sticky;
   top: calc(var(--kopf-hoehe, 0px) + clamp(16px, 1.6vw, 28px));
   display: flex;
@@ -62,9 +53,16 @@
   flex-shrink: 0;
 }
 
-.karten {
-  grid-area: karten;
-  min-width: 0;
+/*
+ * Hohe Bildschirme (ab Full HD): nur so breit, dass Straße und Cockpit ganz in die Höhe passen, mittig.
+ * Gemessen: Höhe ≈ 0,47 × Breite + 220 px, also Breite ≈ 2,1 × verfügbare Höhe − 470 px.
+ * Darunter würde das Cockpit so schmal, dass das Hauptdisplay umbricht und höher wird; dort bleibt die volle Breite.
+ */
+@media (min-width: 901px) and (min-height: 950px) {
+  .buehne {
+    width: min(100%, calc((100dvh - var(--kopf-hoehe, 0px) - 2 * clamp(16px, 1.6vw, 28px)) * 2.1 - 470px));
+    margin-inline: auto;
+  }
 }
 
 .fuss {
@@ -74,31 +72,16 @@
   border-top: 1px solid var(--border);
 }
 
-/* Handy und schmale Fenster: Cockpit klebt oben, Karten darunter. */
+/* Handy und schmale Fenster: Cockpit im normalen Fluss, Platz unten für die Blase */
 @media (max-width: 900px) {
   .haupt {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      'buehne'
-      'karten';
-    padding-top: 0;
+    padding-bottom: 76px;
   }
 
   .buehne {
-    top: var(--kopf-hoehe, 0px);
-    z-index: 10;
-    max-height: calc(68dvh - var(--kopf-hoehe, 0px));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    margin: 0 calc(-1 * clamp(16px, 2vw, 32px));
-    padding: 10px clamp(16px, 2vw, 32px);
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 10px 20px rgb(0 0 0 / 40%);
-  }
-
-  .haupt[data-karten='zu'] {
-    grid-template-columns: minmax(0, 1fr);
+    position: static;
+    max-height: none;
+    overflow: visible;
   }
 
   .titel {

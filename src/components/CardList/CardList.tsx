@@ -4,11 +4,6 @@ import { useKarten } from '../../state/cockpitState';
 import { Card } from '../Card/Card';
 import styles from './CardList.module.css';
 
-interface Props {
-  eingeklappt: boolean;
-  setEingeklappt: (zu: boolean) => void;
-}
-
 /** Reihenfolge der Bereiche; neue Werte aus cards.ts erscheinen danach. */
 const THEMEN = ['Farben, Icons und Kontrast', 'Anordnung', 'Bedienung', 'Inhalte, Sprache und Ton', 'Assistenzsysteme'];
 
@@ -22,45 +17,12 @@ function nachThema(karten: Karte[]) {
   return [...gruppen.entries()].sort(([a], [b]) => rang(a) - rang(b));
 }
 
-export function CardList({ eingeklappt, setEingeklappt }: Props) {
+/** Inhalt der Menü-Blase: Anleitung und die Karten in aufklappbaren Bereichen. */
+export function CardList() {
   const { karten, zustaende } = useKarten();
-  const gesamt = zaehleInvertierte(karten, zustaende);
-
-  if (eingeklappt) {
-    return (
-      <section className={styles.schiene} aria-label="Gestaltungsvorgaben, eingeklappt">
-        <button
-          type="button"
-          className={styles.klappe}
-          aria-expanded={false}
-          aria-label="Karten ausklappen"
-          onClick={() => setEingeklappt(false)}
-        >
-          ›
-        </button>
-        <span className={styles.schieneText}>
-          Karten · {gesamt} von {karten.length} invertiert
-        </span>
-      </section>
-    );
-  }
 
   return (
-    <section className={styles.liste} aria-labelledby="karten-titel">
-      <div className={styles.kopf}>
-        <h2 id="karten-titel" className={styles.titel}>
-          Gestaltungsvorgaben
-        </h2>
-        <button
-          type="button"
-          className={styles.klappe}
-          aria-expanded={true}
-          aria-label="Karten einklappen"
-          onClick={() => setEingeklappt(true)}
-        >
-          ‹
-        </button>
-      </div>
+    <section className={styles.liste} aria-label="Gestaltungsvorgaben">
       <p className={styles.anleitung}>
         Bereich aufklappen, dann Karte antippen: Grün ist korrekt umgesetzt, Rot ist invertiert. Noch einmal
         antippen korrigiert.

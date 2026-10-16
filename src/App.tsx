@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AudioProvider } from './audio/AudioContext';
-import { CardList } from './components/CardList/CardList';
 import { Cockpit } from './components/Cockpit/Cockpit';
 import { useTastatursteuerung } from './components/Cockpit/Fahrerbedienung';
+import { MenueBlase } from './components/MenueBlase/MenueBlase';
 import { Vergleich } from './components/Compare/Vergleich';
 import { QrDialog } from './components/QrDialog/QrDialog';
 import { SoundDirector } from './components/SoundDirector';
@@ -29,7 +29,6 @@ function Oberflaeche() {
   const { karten, zustaende } = useKarten();
   const [qr, setQr] = useState(false);
   const [vergleich, setVergleich] = useState(false);
-  const [kartenZu, setKartenZu] = useState(false);
   useTastatursteuerung();
 
   const modell = useMemo(() => deriveCockpit(karten, zustaende), [karten, zustaende]);
@@ -57,7 +56,7 @@ function Oberflaeche() {
           <Toolbar vergleich={vergleich} setVergleich={setVergleich} oeffneQr={() => setQr(true)} />
         </header>
 
-        <main className={styles.haupt} data-karten={kartenZu ? 'zu' : 'offen'}>
+        <main className={styles.haupt}>
           <section className={styles.buehne} aria-label="Cockpit-Ansicht">
             {vergleich ? (
               <Vergleich />
@@ -68,10 +67,9 @@ function Oberflaeche() {
               </>
             )}
           </section>
-          <aside className={styles.karten} aria-label="Karten">
-            <CardList eingeklappt={kartenZu} setEingeklappt={setKartenZu} />
-          </aside>
         </main>
+
+        <MenueBlase />
 
         <footer className={styles.fuss}>
           Projekt im Modul „Digitale Intelligenz“, M.Sc. Human Factors, Hochschule Furtwangen. Fiktives

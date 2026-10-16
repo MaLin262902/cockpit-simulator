@@ -30,7 +30,7 @@ export function Vergleich() {
 
   return (
     <section className={styles.vergleich} aria-label="Vergleich">
-      <p className={styles.hinweis}>Karten links weiter antippen: Der aktuelle Stand ändert sich mit.</p>
+      <p className={styles.hinweis}>Karten im Menü weiter antippen: Der aktuelle Stand ändert sich mit.</p>
       <div className={styles.tabs} role="tablist" aria-label="Ansicht wählen">
         {seiten.map((s) => (
           <button

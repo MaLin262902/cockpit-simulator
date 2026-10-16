@@ -4,38 +4,9 @@
   gap: 0.5rem;
 }
 
-.kopf {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-}
-
-.titel {
-  font-size: 1rem;
-}
-
 .anleitung {
   color: var(--text-muted);
   font-size: 0.82rem;
-}
-
-.klappe {
-  display: grid;
-  place-items: center;
-  width: 2.2rem;
-  height: 2.2rem;
-  flex: none;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--surface-2);
-  font-size: 1.2rem;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.klappe:hover {
-  background: var(--surface-3);
 }
 
 .gruppe {
@@ -104,36 +75,4 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-}
-
-/* Eingeklappt: schmale Schiene mit Zähler */
-
-.schiene {
-  position: sticky;
-  top: clamp(16px, 1.6vw, 28px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.schieneText {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  color: var(--text-muted);
-  font-size: 0.82rem;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-@media (max-width: 900px) {
-  .schiene {
-    position: static;
-    flex-direction: row;
-  }
-
-  .schieneText {
-    writing-mode: horizontal-tb;
-    transform: none;
-  }
 }

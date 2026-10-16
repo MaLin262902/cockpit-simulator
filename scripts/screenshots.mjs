@@ -103,7 +103,7 @@ async function laufFuerGeraet(browser, geraet, bericht) {
   ergebnis.axeKorrekt = await axe(page, '[data-testid="cockpit"]');
 
   // Vergleich: links der aktuelle Stand (2 Karten invertiert), rechts korrekt; danach eine Karte mehr
-  // Direkt per DOM klicken: Gruppen sind eingeklappt, und auf dem Handy liegt das Cockpit über der Kartenliste.
+  // Direkt per DOM klicken: Die Karten liegen in der zugeklappten Menü-Blase.
   const invertiereKarte = () =>
     page
       .locator('article[data-zustand="korrekt"]')
@@ -137,8 +137,10 @@ async function laufFuerGeraet(browser, geraet, bericht) {
   await foto('07-warnblinker');
   await page.getByRole('button', { name: 'Warnblinker' }).first().click();
 
-  // Gruppen sind anfangs eingeklappt: erste Gruppe öffnen, dann die Info der ersten Karte
-  await page.locator('details > summary').first().evaluate((s) => s.click());
+  // Menü-Blase öffnen (Maus darüber), erste Gruppe aufklappen, dann die Info der ersten Karte
+  await page.locator('#menue-knopf').hover();
+  await warte(200);
+  await page.locator('#menue-inhalt details > summary').first().click();
   await page.locator('summary', { hasText: 'Info' }).first().click();
   await page.locator('summary', { hasText: 'Info' }).first().scrollIntoViewIfNeeded();
   await warte(300);

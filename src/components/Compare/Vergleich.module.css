@@ -5,9 +5,11 @@
   gap: 0.6rem;
 }
 
+/* Mittig, damit die zugeklappte Menü-Blase oben links den Hinweis nicht verdeckt */
 .hinweis {
   color: var(--text-muted);
   font-size: 0.9rem;
+  text-align: center;
 }
 
 .tabs {

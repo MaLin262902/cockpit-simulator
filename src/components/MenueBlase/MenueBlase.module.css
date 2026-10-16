@@ -1,0 +1,98 @@
+/* Schwebende Blase oben links über dem Cockpit; aufgeklappt eine Liste mit allen Karten. */
+.blase {
+  --abstand: clamp(16px, 2vw, 32px);
+  position: fixed;
+  z-index: 15;
+  top: calc(var(--kopf-hoehe, 0px) + 12px);
+  left: var(--abstand);
+  display: flex;
+  flex-direction: column;
+  max-width: calc(100vw - 2 * var(--abstand));
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: rgb(21 26 32 / 92%);
+  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow);
+  transition: border-radius var(--dur-kurz) var(--ease);
+}
+
+.blase[data-offen='true'] {
+  width: min(24rem, calc(100vw - 2 * var(--abstand)));
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.knopf {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  padding: 0.45rem 0.6rem 0.45rem 0.8rem;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.92rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.symbol {
+  display: grid;
+  gap: 3px;
+  width: 16px;
+}
+
+.symbol span {
+  height: 2px;
+  border-radius: 1px;
+  background: currentColor;
+}
+
+.name {
+  flex: 1;
+}
+
+.zaehler {
+  padding: 0.1rem 0.5rem;
+  border-radius: 99px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.zaehler[data-invertiert='true'] {
+  background: var(--inversion-strong);
+  color: #fff;
+}
+
+/* Zugeklappt: Inhalt unsichtbar und nicht erreichbar (inert), aufgeklappt mit eigener Scrollleiste */
+.inhalt {
+  display: none;
+}
+
+.blase[data-offen='true'] .inhalt {
+  display: block;
+  max-height: calc(100dvh - var(--kopf-hoehe, 0px) - 12px - 44px - 2 * var(--abstand));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0 0.8rem 0.8rem;
+  scrollbar-width: thin;
+}
+
+/* Handy: Blase unten links, klappt nach oben auf */
+@media (max-width: 900px) {
+  .blase {
+    top: auto;
+    bottom: 16px;
+    flex-direction: column-reverse;
+  }
+
+  .blase[data-offen='true'] .inhalt {
+    max-height: min(70dvh, calc(100dvh - var(--kopf-hoehe, 0px) - 44px - 48px));
+    padding-top: 0.6rem;
+  }
+}
