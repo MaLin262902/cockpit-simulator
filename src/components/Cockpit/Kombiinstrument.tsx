@@ -52,7 +52,7 @@ export function Kombiinstrument({ m, lage }: Props) {
                 <BlinkerPfeil seite="rechts" an={blinktLinks} />
               </span>
             )}
-            <Tempolimit en={en} />
+            <Tempolimit />
             {m.systemgrenzen === 'invertiert' && (
               // Übervertrauen: groß „100 % sicher“, die Einschränkung nur als Kleingedrucktes mit Sternchen.
               <div className={`${styles.grenzenSabotage} ${styles.blende}`}>
@@ -196,15 +196,18 @@ function MarkeImTacho() {
   );
 }
 
-/** Tempolimit-Schild. Die Warnung beim Überschreiten ist ein Ton (Karte „Akustische Informationsdarstellung“). */
-function Tempolimit({ en }: { en: boolean }) {
+/**
+ * Tempolimit-Schild des Tempowarners. Ist der Tempowarner ausgeschaltet (Menü › Fahrerassistenz), verschwindet es.
+ * Die Warnung beim Überschreiten ist ein Ton (Karte „Akustische Informationsdarstellung“).
+ */
+function Tempolimit() {
   const { tempolimit, isaAus } = useSim();
+  if (isaAus) return null;
   return (
     <div className={styles.tempolimit}>
       <div className={styles.schild} role="img" aria-label={`Tempolimit ${tempolimit} km/h`}>
         {tempolimit}
       </div>
-      {isaAus && <div className={styles.tempoAus}>{en ? 'ISA OFF' : 'Tempowarner aus'}</div>}
     </div>
   );
 }

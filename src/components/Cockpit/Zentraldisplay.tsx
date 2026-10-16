@@ -433,13 +433,15 @@ function FahrzeugAnsicht({ modus, en }: { modus: Modus; en: boolean }) {
           <span>{en ? 'Service' : 'Inspektion'}</span>
           <span>{en ? 'in 2,600 mi' : 'in 4.200 km'}</span>
         </li>
+        {/* Elektroauto: kein Motoröl, aber Kühlmittel für Akku und Antrieb */}
         <li>
-          <span>{en ? 'Oil level' : 'Ölstand'}</span>
+          <span>{en ? 'Coolant' : 'Kühlmittel'}</span>
           <span>{en ? 'OK' : 'in Ordnung'}</span>
         </li>
+        {/* Korrekt ohne Warnung; nur die englische Inversion (reale Welt) zeigt einen Systemcode */}
         <li>
           <span>{en ? 'Washer fluid' : 'Scheibenwaschwasser'}</span>
-          <span>{en ? 'LOW_LVL' : 'bald nachfüllen'}</span>
+          <span>{en ? 'LOW_LVL' : 'voll'}</span>
         </li>
       </ol>
     </div>

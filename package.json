@@ -8,7 +8,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "screenshots": "node scripts/screenshots.mjs"
+    "screenshots": "node scripts/screenshots.mjs",
+    "korrekt": "node scripts/korrekt.mjs"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.5",

@@ -46,6 +46,7 @@ Weitere Befehle:
 | `npm run preview` | Gebaute Seite lokal ansehen |
 | `npm test` | Tests, u. a. Prüfung der Kartendaten |
 | `npm run screenshots` | Screenshots in Handy- und Beamer-Größe nach `screenshots/`, plus Kontrast-Check (axe), Prüfung auf horizontales Scrollen, fremde Netzwerkanfragen und reduzierte Bewegung. Vorher `npm run build`; beim ersten Mal `npx playwright install chromium`. |
+| `npm run korrekt` | Funktionsprüfung des korrekten Cockpits: klickt App-Leiste, Klima, Menü, Tempowarner, Tasten, Warnblinker, Lenkstock, Pedale, Tempomat, Navi-Ansage und Töne durch und meldet jede Abweichung. Vorher `npm run build`. |
 
 Im Hörsaal mit eigenem Laptop im selben WLAN geht auch `npm run dev -- --host`; die angezeigte Netzwerkadresse funktioniert dann auf Handys im selben Netz.
 
