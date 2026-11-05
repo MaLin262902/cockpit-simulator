@@ -2619,3 +2619,73 @@
     padding-left: 0.6em;
   }
 }
+
+/* ---------- Blickabwendung invertiert: alles Fahrrelevante winzig ----------
+ * Tacho, Leistung, Tempolimit, Blinker, Abbiegehinweis, Ankunft, Statusleiste und Warnblinker sind
+ * so klein, dass man den Blick von der Straße nehmen und genau hinsehen muss.
+ */
+
+.cockpit[data-blickabwendung='invertiert'] :is(.tachoBereich, .leistungBereich) .rund {
+  max-width: 96px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .schild {
+  width: 17px;
+  border-width: 2px;
+  font-size: 8px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .blinkerPfeil svg,
+.cockpit[data-blickabwendung='invertiert'] .blinkerStapel svg {
+  width: 11px;
+  height: 11px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] :is(.manoever, .eta, .statusleiste) {
+  --min: 7px;
+  --s: 0.5;
+  zoom: 0.55;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .warnblinkTaste {
+  width: 24px;
+  height: 18px;
+  border-radius: 5px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .warnblinkTaste svg {
+  width: 11px;
+  height: 11px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .warnDrehregler {
+  width: 20px;
+  height: 20px;
+  box-shadow:
+    0 0 0 2px #0a0c0e,
+    0 2px 4px rgb(0 0 0 / 60%);
+}
+
+.cockpit[data-blickabwendung='invertiert'] .warnDrehregler > span::before {
+  top: 2px;
+  height: 4px;
+}
+
+.cockpit[data-blickabwendung='invertiert'] .warnDrehregler svg {
+  width: 7px;
+  height: 7px;
+}
+
+/* ---------- Gruppierung invertiert: Statusleiste und Symbole einzeln verstreut ---------- */
+
+.statusbar[data-gruppierung='invertiert'] > :nth-child(2) {
+  margin-left: 5cqi;
+}
+
+.statusbar[data-gruppierung='invertiert'] > :nth-child(4) {
+  margin-right: 3cqi;
+}
+
+.statusleiste[data-gruppierung='invertiert'] {
+  gap: 3cqi;
+}

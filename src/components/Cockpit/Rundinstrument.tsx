@@ -79,7 +79,7 @@ export function Rundinstrument({ wert, max, schritt, digital, symbol, einheit, z
         {einheit}
       </text>
       {zusatz && (
-        <text className={styles.rundZusatz} x={MITTE} y={MITTE + 62} textAnchor="middle">
+        <text className={styles.rundZusatz} x={MITTE} y={MITTE + 76} textAnchor="middle">
           {zusatz}
         </text>
       )}

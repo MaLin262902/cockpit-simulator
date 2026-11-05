@@ -62,11 +62,14 @@ export function Kachel({
   children,
   name,
   start,
+  hinten,
 }: {
   className?: string;
   children: ReactNode;
   name: string;
   start?: [number, number];
+  /** Bleibt immer unter den anderen Kacheln, auch wenn man sie anklickt; frei wird sie nur durch Wegschieben der anderen. */
+  hinten?: boolean;
 }) {
   const { beweglich, nachVorne } = useContext(Ebenen);
   const element = useRef<HTMLDivElement>(null);
@@ -94,7 +97,7 @@ export function Kachel({
   }, [beweglich]);
 
   const runter = (e: PointerEvent<HTMLDivElement>) => {
-    setEbene(nachVorne());
+    if (!hinten) setEbene(nachVorne());
     const ziel = e.target as HTMLElement;
     if (e.button !== 0 || ziel.closest(INTERAKTIV)) return;
     if (e.pointerType !== 'mouse' && !ziel.closest('[data-griff]')) return;
@@ -152,7 +155,7 @@ export function Kachel({
       className={`${styles.kachel} ${className ?? ''}`}
       data-zieht={zieht}
       data-verschoben={verschoben}
-      style={{ transform: verschoben ? `translate(${pos.x}px, ${pos.y}px)` : undefined, zIndex: ebene || undefined }}
+      style={{ transform: verschoben ? `translate(${pos.x}px, ${pos.y}px)` : undefined, zIndex: hinten ? 0 : ebene || 1 }}
       onPointerDown={runter}
       onPointerMove={bewegen}
       onPointerUp={loslassen}

@@ -2,7 +2,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode, type SVGProps 
 import { useAudio } from '../../audio/AudioContext';
 import { ansageAbspielen } from '../../audio/audioEngine';
 import { ansageFuer, type Ansage } from '../../effects/ansage';
-import { KREUZUNG_ABSTAND } from '../../sim/fahrphysik';
+import { AKKU_PROZENT, KREUZUNG_ABSTAND, akkuSpannung } from '../../sim/fahrphysik';
 import type { CockpitModel, Modus } from '../../effects/deriveCockpit';
 import { useSim } from '../../sim/SimContext';
 import type { Fahrlage } from './Cockpit';
@@ -48,7 +48,7 @@ export function Zentraldisplay({ m, lage }: Props) {
         <Kopfzeile m={m} en={en} />
 
         <div className={styles.hauptbereich}>
-          <Kachel name={ansicht === 'navi' ? 'Karte' : 'Ansicht'} className={styles.hauptansicht}>
+          <Kachel name={ansicht === 'navi' ? 'Karte' : 'Ansicht'} className={styles.hauptansicht} hinten>
             {ansicht === 'navi' && <Navigation m={m} en={en} ansageSpielen={ansageSpielen} spricht={untertitel !== null} />}
             {ansicht === 'medien' && <MedienAnsicht en={en} />}
             {ansicht === 'telefon' && <TelefonAnsicht en={en} />}
@@ -58,17 +58,17 @@ export function Zentraldisplay({ m, lage }: Props) {
           </Kachel>
           <div className={styles.seite}>
             {ansicht !== 'medien' && (
-              <Kachel name="Medien" start={[0.36, 0.1]}>
+              <Kachel name="Medien" start={[0.42, 0.02]}>
                 <Medien kompakt={reduziert} en={en} />
               </Kachel>
             )}
             {ansicht !== 'fahrzeug' && (
-              <Kachel name="Reifendruck" start={[0.28, -0.16]}>
+              <Kachel name="Reifendruck" start={[0.4, 0.16]}>
                 <Fahrzeugstatus modus={m.farblogik} en={en} />
               </Kachel>
             )}
             {m.ablenkung === 'invertiert' && (
-              <Kachel name="Werbung" start={[0.18, -0.3]}>
+              <Kachel name="Werbung" start={[0.5, -0.08]}>
                 <Werbung en={en} />
               </Kachel>
             )}
@@ -112,26 +112,61 @@ function uhrzeit(en: boolean, plusMinuten = 0, sekunden = false) {
 }
 
 function Kopfzeile({ m, en }: { m: CockpitModel; en: boolean }) {
+  // Inversion Systemstatus: Die Uhrzeit steht nur im Menü.
+  const uhr =
+    m.systemstatus === 'invertiert' ? null : (
+      // Inversion Informationsreduktion: Uhrzeit sekundengenau, die Zahl ändert sich ständig.
+      <span key="uhr" className={styles.uhr}>
+        {uhrzeit(en, 0, m.ablenkung === 'invertiert')}
+      </span>
+    );
+  const mitte = (
+    <span key="mitte" className={styles.statusbarMitte}>
+      {m.ablenkung === 'invertiert' && <span className={styles.chipLaut}>🔔 12</span>}
+      {m.ablenkung === 'invertiert' && <span className={styles.chipLaut}>{en ? 'Update ready!' : 'Update verfügbar!'}</span>}
+      {en && <span className={styles.chipCode}>SW v4.2.1-rc3</span>}
+    </span>
+  );
+  const temperatur = <span key="temp">{en ? '46 °F' : '8 °C'}</span>;
+  // Inversion reale Welt: Systembegriff statt bekanntem Symbol.
+  const bluetooth = en ? (
+    <span key="bt" className={styles.chipCode}>
+      Bluetooth_on
+    </span>
+  ) : (
+    <I.Bluetooth key="bt" className={styles.statusIcon} />
+  );
+  // Inversion Symbolkonventionen: Empfangsbalken fallen nach rechts ab statt anzusteigen (CSS).
+  const empfang = (
+    <span key="empfang" className={styles.empfang} aria-hidden="true">
+      <i />
+      <i />
+      <i />
+      <i />
+    </span>
+  );
+
+  // Inversion Gruppierung: Bluetooth, Uhr, Empfang und Außentemperatur stehen einzeln an verschiedenen Stellen.
+  if (m.gruppierung === 'invertiert') {
+    return (
+      <div className={styles.statusbar} data-gruppierung="invertiert">
+        {bluetooth}
+        {uhr}
+        {mitte}
+        {empfang}
+        {temperatur}
+      </div>
+    );
+  }
+
   return (
     <div className={styles.statusbar}>
-      {/* Inversion Informationsreduktion: Uhrzeit sekundengenau, die Zahl ändert sich ständig. */}
-      <span className={styles.uhr}>{uhrzeit(en, 0, m.ablenkung === 'invertiert')}</span>
-      <span className={styles.statusbarMitte}>
-        {m.ablenkung === 'invertiert' && <span className={styles.chipLaut}>🔔 12</span>}
-        {m.ablenkung === 'invertiert' && <span className={styles.chipLaut}>{en ? 'Update ready!' : 'Update verfügbar!'}</span>}
-        {en && <span className={styles.chipCode}>SW v4.2.1-rc3</span>}
-      </span>
+      {uhr ?? <span />}
+      {mitte}
       <span className={styles.statusbarRechts}>
-        <span>{en ? '46 °F' : '8 °C'}</span>
-        {/* Inversion reale Welt: Systembegriff statt bekanntem Symbol. */}
-        {en ? <span className={styles.chipCode}>Bluetooth_on</span> : <I.Bluetooth className={styles.statusIcon} />}
-        {/* Inversion Symbolkonventionen: Empfangsbalken fallen nach rechts ab statt anzusteigen (CSS). */}
-        <span className={styles.empfang} aria-hidden="true">
-          <i />
-          <i />
-          <i />
-          <i />
-        </span>
+        {temperatur}
+        {bluetooth}
+        {empfang}
       </span>
     </div>
   );
@@ -761,7 +796,7 @@ function Menue({
   en: boolean;
   schliessen: () => void;
 }) {
-  const { isaAus, setIsaAus, warnblinker, setWarnblinker } = useSim();
+  const { isaAus, setIsaAus, warnblinker, setWarnblinker, leistung } = useSim();
   const [pfad, setPfad] = useState<string[]>([]);
   const [ambiente, setAmbiente] = useState(0);
   const [massage, setMassage] = useState(4);
@@ -769,11 +804,11 @@ function Menue({
   const [sprache, setSprache] = useState('Deutsch');
   const blick = m.blickabwendung === 'invertiert';
   const tempoImMenue = m.systemstatus === 'invertiert';
-  const tempoAnzeige = (
-    <span className={styles.menueTempo}>
-      {en ? Math.round(tempo * 0.621) : tempo} {en ? 'mph' : 'km/h'}
-    </span>
-  );
+  const anzeige = (text: string) => <span className={styles.menueTempo}>{text}</span>;
+  const tempoAnzeige = anzeige(`${en ? Math.round(tempo * 0.621) : tempo} ${en ? 'mph' : 'km/h'}`);
+  const leistungAnzeige = anzeige(`${leistung} kW`);
+  const akkuAnzeige = anzeige(en ? `HV ${akkuSpannung(leistung).toFixed(1)} V` : `${AKKU_PROZENT} %`);
+  const uhrAnzeige = anzeige(uhrzeit(en));
 
   const schalter = (text: string, an: boolean, umschalten: () => void) => (
     <button type="button" className={styles.menuePunkt} aria-pressed={an} onClick={umschalten}>
@@ -783,7 +818,19 @@ function Menue({
 
   // Korrekt: flach und nach Aufgaben sortiert, jede Einstellung nach zwei Schritten erreichbar.
   const flach: Knoten[] = [
-    ...(tempoImMenue ? [{ label: 'Anzeigen', kinder: [{ label: 'Geschwindigkeit', inhalt: tempoAnzeige }] }] : []),
+    ...(tempoImMenue
+      ? [
+          {
+            label: 'Anzeigen',
+            kinder: [
+              { label: 'Geschwindigkeit', inhalt: tempoAnzeige },
+              { label: 'Leistung', inhalt: leistungAnzeige },
+              { label: 'Akkustand', inhalt: akkuAnzeige },
+              { label: 'Uhrzeit', inhalt: uhrAnzeige },
+            ],
+          },
+        ]
+      : []),
     {
       label: 'Klima',
       kinder: [
@@ -936,7 +983,11 @@ function Menue({
           ? [
               {
                 label: 'Anzeigen',
-                kinder: [{ label: 'Tacho', kinder: [{ label: 'Geschwindigkeit anzeigen', inhalt: tempoAnzeige }] }],
+                kinder: [
+                  { label: 'Tacho', kinder: [{ label: 'Geschwindigkeit anzeigen', inhalt: tempoAnzeige }] },
+                  { label: 'Antrieb', kinder: [{ label: 'Leistungsanzeige', inhalt: leistungAnzeige }] },
+                  { label: 'Hochvoltsystem', kinder: [{ label: 'Akkustand anzeigen', inhalt: akkuAnzeige }] },
+                ],
               },
             ]
           : []),
@@ -967,6 +1018,9 @@ function Menue({
             },
           ],
         },
+        ...(tempoImMenue
+          ? [{ label: 'Datum und Zeit', kinder: [{ label: 'Uhrzeit anzeigen', inhalt: uhrAnzeige }] }]
+          : []),
         {
           label: 'Datenschutz',
           kinder: [{ label: 'Warnblinker', inhalt: schalter('Warnblinker', warnblinker, () => setWarnblinker(!warnblinker)) }],

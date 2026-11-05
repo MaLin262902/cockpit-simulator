@@ -1,4 +1,4 @@
-import type { CSSProperties } from 'react';
+import { Fragment, type CSSProperties, type ReactNode } from 'react';
 import type { CockpitModel, Modus } from '../../effects/deriveCockpit';
 import { useBlinktakt } from '../../hooks/useBlinktakt';
 import { AKKU_PROZENT, akkuSpannung } from '../../sim/fahrphysik';
@@ -30,11 +30,23 @@ export function Kombiinstrument({ m, lage }: Props) {
         <div className={styles.kopf}>
           {blinkerAussen && <BlinkerPfeil seite="links" an={blinktLinks} />}
           <div className={styles.kopfMitte}>
-            <Kontrollleuchten modus={m.farblogik} en={en} tempomat={sim.tempomat} />
-            <div className={styles.kopfRechts}>
-              <AkustikHinweis modus={m.akustik} />
-              <AssistStatus modus={m.systemstatus} en={en} aktiv={sim.assistAktiv} />
-            </div>
+            <Kontrollleuchten
+              modus={m.farblogik}
+              en={en}
+              tempomat={sim.tempomat}
+              // Inversion Gruppierung: Lautsprecher- und Spursymbol stehen zwischen den Kontrollleuchten.
+              eingemischt={
+                m.gruppierung === 'invertiert'
+                  ? [<AssistStatus key="spur" modus={m.systemstatus} en={en} aktiv={sim.assistAktiv} />, <AkustikHinweis key="ton" modus={m.akustik} />]
+                  : undefined
+              }
+            />
+            {m.gruppierung !== 'invertiert' && (
+              <div className={styles.kopfRechts}>
+                <AkustikHinweis modus={m.akustik} />
+                <AssistStatus modus={m.systemstatus} en={en} aktiv={sim.assistAktiv} />
+              </div>
+            )}
           </div>
           {blinkerAussen && <BlinkerPfeil seite="rechts" an={blinktRechts} />}
         </div>
@@ -72,18 +84,29 @@ export function Kombiinstrument({ m, lage }: Props) {
         {/* Elektroauto: Leistungsanzeige statt Drehzahlmesser */}
         <div className={styles.leistungBereich}>
           <Rundinstrument
-            wert={sim.leistung}
+            wert={m.systemstatus === 'invertiert' ? null : sim.leistung}
             max={150}
             schritt={25}
             digital="D"
-            einheit="kW"
-            beschriftung={`Leistungsanzeige ${sim.leistung} kW, Fahrstufe D`}
+            symbol={m.systemstatus === 'invertiert' ? <MarkeImTacho /> : undefined}
+            einheit={m.systemstatus === 'invertiert' ? '' : 'kW'}
+            zusatz={m.systemstatus === 'invertiert' ? (en ? 'PWR: see menu' : 'Leistung: siehe Menü') : undefined}
+            beschriftung={
+              m.systemstatus === 'invertiert' ? 'Leistungsanzeige ohne Wert' : `Leistungsanzeige ${sim.leistung} kW, Fahrstufe D`
+            }
           />
         </div>
 
         {m.ablenkung === 'invertiert' && <MiniAnzeigen />}
 
-        <Statusleiste en={en} sekunden={m.ablenkung === 'invertiert'} kw={sim.leistung} />
+        <Statusleiste
+          en={en}
+          sekunden={m.ablenkung === 'invertiert'}
+          kw={sim.leistung}
+          // Inversion Systemstatus: Akkustand und Uhrzeit nur im Menü.
+          versteckt={m.systemstatus === 'invertiert'}
+          gemischt={m.gruppierung === 'invertiert'}
+        />
       </div>
     </section>
   );
@@ -117,24 +140,43 @@ function BlinkerPfeil({ seite, an }: { seite: 'links' | 'rechts'; an: boolean })
   );
 }
 
-function Kontrollleuchten({ modus, en, tempomat }: { modus: Modus; en: boolean; tempomat: boolean }) {
+function Kontrollleuchten({
+  modus,
+  en,
+  tempomat,
+  eingemischt,
+}: {
+  modus: Modus;
+  en: boolean;
+  tempomat: boolean;
+  eingemischt?: ReactNode[];
+}) {
   const lampen = LAMPEN.filter((l) => (modus === 'invertiert' || l.art !== 'warnung') && (tempomat || l.id !== 'tempomat'));
   return (
     <ul key={modus} className={`${styles.lampen} ${styles.blende}`} aria-label="Kontrollleuchten">
-      {lampen.map(({ id, art, Symbol, Erfunden, text, textEn }) => {
+      {lampen.map(({ id, art, Symbol, Erfunden, text, textEn }, i) => {
         const Icon = modus === 'invertiert' ? Erfunden : Symbol;
         const beschriftung = en ? textEn : text;
         return (
-          <li key={id} className={styles.lampe} data-art={art}>
-            <Icon className={styles.lampenSymbol} />
-            {modus === 'korrekt' ? (
-              <span className={styles.lampenText}>{beschriftung}</span>
-            ) : (
-              <span className="visually-hidden">{beschriftung}</span>
-            )}
-          </li>
+          <Fragment key={id}>
+            {eingemischt?.[i] && <li className={styles.lampe}>{eingemischt[i]}</li>}
+            <li className={styles.lampe} data-art={art}>
+              <Icon className={styles.lampenSymbol} />
+              {modus === 'korrekt' ? (
+                <span className={styles.lampenText}>{beschriftung}</span>
+              ) : (
+                <span className="visually-hidden">{beschriftung}</span>
+              )}
+            </li>
+          </Fragment>
         );
       })}
+      {/* Übrige Symbole ans Ende, falls weniger Leuchten brennen als eingemischt werden. */}
+      {eingemischt?.slice(lampen.length).map((knoten, i) => (
+        <li key={`extra${i}`} className={styles.lampe}>
+          {knoten}
+        </li>
+      ))}
     </ul>
   );
 }
@@ -240,21 +282,37 @@ function Akku({ en, kw }: { en: boolean; kw: number }) {
   );
 }
 
-function Statusleiste({ en, sekunden, kw }: { en: boolean; sekunden: boolean; kw: number }) {
+function Statusleiste({
+  en,
+  sekunden,
+  kw,
+  versteckt,
+  gemischt,
+}: {
+  en: boolean;
+  sekunden: boolean;
+  kw: number;
+  versteckt: boolean;
+  gemischt: boolean;
+}) {
   const uhrzeit = new Date().toLocaleTimeString(en ? 'en-US' : 'de-DE', {
     hour: '2-digit',
     minute: '2-digit',
     ...(sekunden ? { second: '2-digit' } : {}),
   });
-  const felder = en
-    ? ['RNG 256 mi', '46 °F', uhrzeit, 'ODO 19,472 mi']
-    : ['412 km', '8 °C', uhrzeit, '31 337 km'];
+  const [reichweite, aussen, , kilometer] = en
+    ? ['RNG 256 mi', '46 °F', '', 'ODO 19,472 mi']
+    : ['412 km', '8 °C', '', '31 337 km'];
+  const akku = <Akku key="akku" en={en} kw={kw} />;
+  const feld = (text: string) => <span key={text}>{text}</span>;
+  // Korrekt: Akku und Reichweite zusammen, dann Außentemperatur, Uhrzeit und Kilometerstand.
+  // Inversion Gruppierung: Uhrzeit zwischen den Energieangaben, Kilometerstand dazwischen.
+  const reihe = gemischt
+    ? [feld(aussen), akku, feld(kilometer), feld(uhrzeit), feld(reichweite)]
+    : [akku, feld(reichweite), feld(aussen), feld(uhrzeit), feld(kilometer)];
   return (
-    <div className={styles.statusleiste}>
-      <Akku en={en} kw={kw} />
-      {felder.map((f) => (
-        <span key={f === uhrzeit ? 'uhr' : f}>{f}</span>
-      ))}
+    <div className={styles.statusleiste} data-gruppierung={gemischt ? 'invertiert' : 'korrekt'}>
+      {versteckt ? reihe.filter((k) => k.key !== 'akku' && k.key !== uhrzeit) : reihe}
     </div>
   );
 }
