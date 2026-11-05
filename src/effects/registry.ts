@@ -4,7 +4,7 @@
  */
 export const EFFEKTE = {
   systemstatus: { bereich: 'Tacho, Leistung, Akkustand, Uhrzeit und Status des Fahrassistenten' },
-  farblogik: { bereich: 'Kontrollleuchten und Warnfarben' },
+  farblogik: { bereich: 'Kontrollleuchten, Warnfarben und Schriftart' },
   kontrast: { bereich: 'Lesbarkeit von Tacho, Statusleiste und Navi-Hinweis' },
   akustik: { bereich: 'Navi-Ansagen und Warntöne' },
   ablenkung: { bereich: 'Menge der Informationen' },

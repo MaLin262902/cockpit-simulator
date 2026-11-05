@@ -33,8 +33,8 @@ export const cards: Karte[] = [
     quelleStatus: 'geprüft',
     quelleHinweis: 'Link führt zu Nielsen. UN-Regelung Nr. 121 im Wortlaut geprüft (ABl. der EU, Fassung mit Änderungsserie 01).',
     regel: 'Symbole und Farben folgen gelernten Konventionen, damit Warnungen ohne Nachdenken erkannt werden.',
-    sabotage: 'Erfundene Symbole, Warnung in Grün, Normalzustand in Rot, Blinker in Magenta, App-Icons in beliebigen Signalfarben, Empfangsbalken spiegelverkehrt.',
-    korrekt: 'Standardsymbole, übliche Farblogik (Rot Gefahr, Gelb Warnung, Grün aktiv).',
+    sabotage: 'Erfundene Symbole, Warnung in Grün, Normalzustand in Rot, Blinker in Magenta, App-Icons in beliebigen Signalfarben, Empfangsbalken spiegelverkehrt, verspielte Handschrift (Comic-Stil) im ganzen Cockpit statt einer klaren Schrift.',
+    korrekt: 'Standardsymbole, übliche Farblogik (Rot Gefahr, Gelb Warnung, Grün aktiv), klare Groteskschrift.',
     effekt: 'farblogik',
   },
   {

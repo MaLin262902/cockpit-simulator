@@ -2503,6 +2503,13 @@
   opacity: 1;
 }
 
+/* Farbcodierung und Symbolkonventionen invertiert: Verspielte Handschrift statt einer Schrift, die im Fahrzeug
+ * auf einen Blick lesbar ist. Nur Systemschriften, es wird nichts nachgeladen. */
+.cockpit[data-farblogik='invertiert'] {
+  --font: 'Comic Sans MS', 'Comic Neue', 'Chalkboard SE', 'Segoe Print', cursive;
+  --ck-font: var(--font);
+}
+
 /* ---------- Farbcodierung und Symbolkonventionen invertiert ----------
  * Farben ohne Bedeutung: Blinker in Magenta, jede App in einer anderen Signalfarbe,
  * Spurhalten in Alarmrot, Empfangsbalken spiegelverkehrt.
